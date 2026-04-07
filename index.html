@@ -1,160 +1,188 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniBites</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <title>Document</title>
 </head>
 <body>
 
-    <!-- NAVIGATION BAR -->
-    <nav class="navbar">
-        <div class="logo">UniBites</div>
-        <div class="nav-buttons">
-            <button class="login"><a href="login_register/login.html">Login</a></button>
-            <button class="signup"><a href="login_register/register.html">Sign Up</a></button>
-        </div>
-    </nav>
+    <div class="nav">
 
-    <section class="utility-bar" aria-label="Theme and language controls">
-        <div class="utility-group">
-            <button class="utility-trigger" type="button" data-menu-target="theme-menu" aria-expanded="false" aria-controls="theme-menu">
-                <span data-i18n="chooseTheme">Choose Theme</span> ◐
-            </button>
-            <div class="utility-menu" id="theme-menu">
-                <label>
-                    <input type="radio" name="theme" value="dark">
-                    <span data-i18n="dark">Dark</span>
-                </label>
-                <label>
-                    <input type="radio" name="theme" value="light" checked>
-                    <span data-i18n="light">Light</span>
-                </label>
+        <div class="logo">
+            <h1>UniBites</h1>
+        </div>
+
+        <div class="curr-location">
+            <p>Aratou 60 ,Patras </p>
+            <span><i class="fa-solid fa-sort-down"></i></span>
+        </div>
+
+        <div class="control">
+            <span><i class="fa-solid fa-house"></i></span>
+            <span><i class="fa-solid fa-circle-user"></i></span>
+        </div>
+    </div>
+
+    <h1>Welcome Back, User</h1>
+
+    <div class="main active">
+        <section class="description">
+            <div class="container">
+                <label for="description">Write your description : </label>
+                <textarea class="usr-input" name="" id="description" rows="6" placeholder="Write your description"></textarea>
             </div>
-        </div>
+        </section>
 
-        <div class="utility-group">
-            <button class="utility-trigger" type="button" data-menu-target="language-menu" aria-expanded="false" aria-controls="language-menu">
-                <span id="language-label">ENG</span> ▾
-            </button>
-            <div class="utility-menu" id="language-menu">
-                <label>
-                    <input type="radio" name="language" value="en" checked>
-                    English(EN)
-                </label>
-                <label>
-                    <input type="radio" name="language" value="gr">
-                    Ελληνικά(GR)
-                </label>
+        <section class="portions">
+            <div class="container">
+                <label for="portion">Quantity : </label>
+                <input type="number" id="portion" min="1" max="10" step="1">
             </div>
-        </div>
+        </section>
 
-        <a class="about-link" href="#about-us">
-            <span data-i18n="moreAboutUs">More About us</span> ⓘ
-        </a>
-    </section>
+        <section class="tags">
+            <div class="container">
+                <label>Tags <i class="fa-solid fa-sort-down"></i></label>
 
-    <!-- MAIN CONTENT -->
-    <div id="main-content">
-        <!-- HERO IMAGE -->
-    <section class="hero">
-        <img src="panoramic_food.jpg" alt="Food image">
-        <div class="hero-text">
-            <h1>Cooked Up By Students<br> For Students</h1>
-        </div>
-    </section>
+                <div class="items">
+                    <ul>
+                        <li>
+                            <label for="beef">Beef <i class="fa-solid fa-cow"></i></label>
+                            <input type="checkbox" id="beef" value="Beef">
+                        </li>
+                        <li>
+                            <label for="dairy">Dairy <i class="fa-solid fa-cheese"></i></label> 
+                            <input type="checkbox" id="dairy" value="Dairy">
+                        </li>
 
-    <!-- STATS -->
-    <section class="stats">
-        <div class="stat">
-            <h3>350</h3>
-            <p>Meals Shared Last Week</p>
-        </div>
-        <div class="stat">
-            <h3>1300+</h3>
-            <p>Registered Users</p>
-        </div>
-        <div class="stat">
-            <h3>2500+</h3>
-            <p>Total Meals Shared</p>
-        </div>
-    </section>
+                        <li> 
+                            <label for="eggs">Eggs <i class="fa-solid fa-egg"></i></label>
+                            <input type="checkbox" id="eggs" value="Eggs">
+                        </li>
 
-    <section class="about-section" id="about-us">
-        <div class="description">
-            <h2 data-i18n="aboutTitle">About UniBites</h2>
-            <p data-i18n="aboutText">UniBite is a website that aims to blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah</p>
-        </div>
-    </section>
-    
-    <section class="carousel-section">
-    <h2>Popular Meal Offerings</h2>
+                        <li> 
+                            <label for="fish">Fish <i class="fa-solid fa-fish"></i></label>
+                            <input type="checkbox" id="fish" value="Fish">
+                        </li>
 
-    <div class="carousel-container">
-        <button class="arrow left">❮</button>
+                        <li> 
+                            <label for="rice">Rice <i class="fa-solid fa-bowl-rice"></i></label>
+                            <input type="checkbox" id="rice" value="Rice">
+                        </li>
 
-        <div class="carousel" id="carousel-popular">
-            <div class="card">Meal Post 1</div>
-            <div class="card">Meal Post 2</div>
-            <div class="card">Meal Post 3</div>
-            <div class="card">Meal Post 4</div>
-            <div class="card">Meal Post 5</div>
-            <div class="card">Meal Post 6</div>
-            <div class="card">Meal Post 7</div>
-            <div class="card">Meal Post 8</div>
-            <div class="card">Meal Post 9</div>
-            <div class="card">Meal Post 10</div>
-        </div>
-        <button class="arrow right">❯</button>
-    </div>
-    </section>
+                        <li> 
+                            <label for="poultry">Poultry <i class="fa-solid fa-drumstick-bite"></i></label>
+                            <input type="checkbox" id="poultry" value="Poultry">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-    <section class="carousel-section">
-    <h2>Meal Offerings near you</h2>
+        <section class="alergies">
+            <div class="container">
+                <label>Alergies <i class="fa-solid fa-sort-down"></i></label>
 
-    <div class="carousel-container">
-        <button class="arrow left">❮</button>
+                <div class="items">
+                    <!-- list created from js -->
+                    <ul>
+                        <li>
+                            <label for="gluten">Gluten</label>
+                            <input type="checkbox" id="gluten" value="Gluten">
+                        </li>
 
-        <div class="carousel" id="carousel-near">
-            <div class="card">Meal Post 1</div>
-            <div class="card">Meal Post 2</div>
-            <div class="card">Meal Post 3</div>
-            <div class="card">Meal Post 4</div>
-            <div class="card">Meal Post 5</div>
-            <div class="card">Meal Post 6</div>
-            <div class="card">Meal Post 7</div>
-            <div class="card">Meal Post 8</div>
-            <div class="card">Meal Post 9</div>
-            <div class="card">Meal Post 10</div>
-        </div>
+                        <li>
+                            <label for="soybeans">Soybeans </label> 
+                            <input type="checkbox" id="soybean" value="Soybeans">
+                        </li>
 
-        <button class="arrow right">❯</button>
-    </div>
-    </section>
+                        <li> 
+                            <label for="milk">Milk</label>
+                            <input type="checkbox" id="milk" value="Milk">
+                        </li>
+
+                        <li> 
+                            <label for="peanuts">Peanuts </label>
+                            <input type="checkbox" id="peanuts" value="Peanuts">
+                        </li>
+
+                        <li> 
+                            <label for="celery">Celery </label>
+                            <input type="checkbox" id="celery" value="Celery">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
     </div>
 
-    <footer class="footer">
-    <div class="footer-content">
-        <div class="footer-section links">
-        <h4>Quick Links</h4>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
-        </ul>
+    <div class="page-two">
+        <section class="pickup-point">
+            <div class="container">
+                <label>Pickup-Points <i class="fa-solid fa-sort-down"></i></label>
+                <div class="items">
+                    <!-- list created from js -->
+                    <ul>
+                        <li>
+                            <label for="address1">Agiou Nikolaou 71, Patras</label>
+                            <input type="checkbox" id="address1">
+                        </li>
+
+                        <li>
+                            <label for="address2">Korinthou 110, Patras </label> 
+                            <input type="checkbox" id="address2" >
+                        </li>
+                    </ul>
+                    <button class="add-address">Add a new Address</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="timeslot">
+            <div class="container">
+                <label for="timeslot">Timeslot : </label>
+                <input type="datetime-local">
+            </div>
+        </section>
+    </div>
+
+    <div class="next-page active">
+            <span style="pointer-events: none;"><i class="fa-solid fa-caret-left"></i></span>
+            <span><i class="fa-solid fa-caret-right"></i></span>
+    </div>
+
+    <div class="address-page">
+        <div class="control">
+            <h1>Add a New Address</h1>
+            <button class="go-back"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="footer-section contact">
-        <h4>Contact</h4>
-        <p>Email: teamemail@upnet.gr</p>
+        
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" placeholder="Search Address">
+        </div>
+
+        <div id="map">
+            
+        </div>
+
+        <div class="confirm">
+            <button>Confirm</button>
         </div>
     </div>
-    <div class="footer-bottom">
-        &copy; 2026 University of Patras. All rights reserved.
+
+
+    <div class="footer">
+
+
     </div>
-    </footer>
 
-    <script src="index.js"></script>
-
+    <script src="main.js"></script>
 </body>
 </html>
