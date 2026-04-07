@@ -6,7 +6,7 @@
     --bg-dark: #1a1714;
     --text-light: #f7e6d6;
     --menu-bg-light: #e8ddd0;
-    --menu-bg-dark: #3b342d;
+    --menu-bg-dark: #2a1e15;
 }
 
 body {
@@ -29,7 +29,7 @@ body.theme-dark {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--text-dark);
+    background-color: var(--bg-light);
     color: var(--primary);
     padding: 15px 30px;
 }
@@ -140,6 +140,10 @@ body.theme-dark .utility-bar {
     background-color: var(--bg-dark);
     border-top-color: rgba(247, 230, 214, 0.22);
     border-bottom-color: rgba(247, 230, 214, 0.22);
+}
+
+body.theme-dark .navbar {
+    background-color: var(--bg-dark);
 }
 
 body.theme-dark .utility-trigger,
