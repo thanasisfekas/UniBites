@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS user(
     usr_id INT(11) PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(30) UNIQUE NOT NULL ,
     password VARCHAR(100) NOT NULL,
-    role ENUM('STUDENT','ADMIN') NOT NULL
+    usr_rating SMALLINT,
+    CHECK (usr_rating >= 1 AND usr_rating <= 5)
+    
 );
 
 CREATE TABLE IF NOT EXISTS student(
@@ -16,12 +18,21 @@ CREATE TABLE IF NOT EXISTS student(
     FOREIGN KEY(std_id) REFERENCES user(usr_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS usr_address(
+    addr_id INT ,
+    std_id ,
+    FOREIGN KEY(std_id) REFERENCES student(std_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+
+
+);
+
 CREATE TABLE IF NOT EXISTS admin(
     adm_id INT(11) PRIMARY KEY AUTO_INCREMENT,
     adm_username VARCHAR(30) UNIQUE NOT NULL,
-    adm_password VARCHAR(100) NOT NULL,
-    FOREIGN KEY (adm_username) REFERENCES user(username),
-    FOREIGN KEY(adm_id) REFERENCES user(usr_id)
+    adm_password VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS listings(
@@ -33,6 +44,8 @@ CREATE TABLE IF NOT EXISTS listings(
     pickup_time DATETIME NOT NULL,
     portions SMALLINT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    lst_rating SMALLINT ,
+    CHECK (lst_rating >= 1 AND lst_rating <= 5)
     FOREIGN KEY(cooker) REFERENCES student(std_username) ON DELETE CASCADE
 );
 
@@ -53,5 +66,17 @@ CREATE TABLE IF NOT EXISTS rating(
     CHECK (score >= 1 AND score <= 5),
     FOREIGN KEY(rq_id) REFERENCES requests(rq_id) ON DELETE CASCADE
 );
+
+
+
+//added deliveries,settings,usr_address
+
+CREATE TABLE IF NOT EXISTS deliveries(
+    del_time TIMESTAMP,
+    del_rating ,
+    id_req
+);
+
+
 
 
