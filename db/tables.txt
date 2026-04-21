@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS admin(
 );
 
 CREATE TABLE IF NOT EXISTS usr_address(
-    addr_id INT ,
-    std_id ,
+    addr_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    std_id INT NOT NULL,
     FOREIGN KEY(std_id) REFERENCES student(std_id) ON DELETE CASCADE
 );
 
@@ -85,6 +85,4 @@ CREATE TABLE IF NOT EXISTS deliveries(
     std_id INT NOT NULL,
     FOREIGN KEY(std_id) REFERENCES student(std_id) ON DELETE CASCADE,
     FOREIGN KEY(req_id) REFERENCES requests(rq_id) ON DELETE CASCADE
-    del_rating ,
-    id_req
 );
