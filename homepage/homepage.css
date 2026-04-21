@@ -115,12 +115,11 @@ body.theme-dark .avatar {
     display: none;
     flex-direction: column;
     box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    overflow: hidden;
     z-index: 1000;
 }
 
 .menu-section {
-    padding: 10px;
+    padding: 4px 0;
     border-bottom: 1px solid var(--menu-bg-light);
 }
 
@@ -157,6 +156,7 @@ body.theme-dark .menu-section .menu-btn:hover {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    padding: 6px 10px;
 }
 
 .username {
@@ -173,10 +173,14 @@ body.theme-dark .menu-section .menu-btn:hover {
     margin-top: 5px;
     background: var(--menu-bg-dark);
     border: none;
-    padding: 6px;
+    padding: 6px 0;
     border-radius: 6px;
     color: var(--text-dark);
     cursor: pointer;
+}
+
+.menu-section .edit-btn {
+    padding: 6px 0;
 }
 
 .menu-section button {
@@ -520,60 +524,36 @@ body.theme-dark .post-meta {
 }
 
 /* ------------------------------
-   UTILITY BAR
+   UTILITY ROWS (inside dropdown)
 ------------------------------ */
-.utility-bar {
+.utility-row {
     display: flex;
-    align-items: flex-start;
-    gap: 26px;
-    padding: 10px 30px 14px;
-    background-color: var(--bg-light);
-    border-top: 1px solid rgba(16, 12, 8, 0.18);
-    border-bottom: 4px solid rgba(16, 12, 8, 0.18);
-}
-
-.utility-group {
-    position: relative;
-}
-
-.utility-trigger {
-    background: none;
-    border: none;
-    color: var(--text-dark);
-    font-size: 16px;
-    cursor: pointer;
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
-
-.utility-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 0;
-    background-color: var(--menu-bg-light);
-    border: 1px solid var(--text-dark);
-    border-radius: 14px;
-    padding: 8px;
     flex-direction: column;
-    gap: 8px;
-    z-index: 10;
+    padding: 4px 10px;
+    gap: 4px;
 }
 
-.utility-group:hover .utility-menu {
+.utility-label {
+    font-size: 14px;
+    color: var(--text-dark);
+    white-space: nowrap;
+}
+
+.utility-opts {
     display: flex;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-dark);
 }
 
-body.theme-dark .utility-bar {
-    background-color: var(--bg-dark);
+.utility-opts label {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
 }
 
-body.theme-dark .utility-trigger {
+body.theme-dark .utility-label,
+body.theme-dark .utility-opts {
     color: var(--text-light);
-}
-
-body.theme-dark .utility-menu {
-    background-color: var(--menu-bg-dark);
-    color: var(--text-light);
-    border-color: var(--text-light);
 }

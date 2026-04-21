@@ -53,6 +53,24 @@
                         <a href="/pending-requests" class="menu-btn">Pending Requests</a>
                     </section>
 
+                    <!-- SETTINGS -->
+                    <section class="menu-section">
+                        <div class="utility-row">
+                            <span class="utility-label" data-i18n="chooseTheme">Theme</span>
+                            <div class="utility-opts">
+                                <label><input type="radio" name="theme" value="dark"> <span data-i18n="dark">Dark</span></label>
+                                <label><input type="radio" name="theme" value="light" checked> <span data-i18n="light">Light</span></label>
+                            </div>
+                        </div>
+                        <div class="utility-row">
+                            <span class="utility-label">Language</span>
+                            <div class="utility-opts">
+                                <label><input type="radio" name="language" value="en" checked> EN</label>
+                                <label><input type="radio" name="language" value="gr"> GR</label>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- LOGOUT -->
                     <section class="menu-section">
                         <a href="/logout" class="menu-btn logout">Log Out</a>
@@ -63,43 +81,7 @@
         </div>
     </header>
 
-    <!-- UTILITY BAR -->
-    <section class="utility-bar" aria-label="Theme and language controls">
 
-        <div class="utility-group">
-            <button class="utility-trigger" type="button">
-                <span data-i18n="chooseTheme">Choose Theme</span> ◐
-            </button>
-
-            <div class="utility-menu">
-                <label>
-                    <input type="radio" name="theme" value="dark">
-                    <span data-i18n="dark">Dark</span>
-                </label>
-                <label>
-                    <input type="radio" name="theme" value="light" checked>
-                    <span data-i18n="light">Light</span>
-                </label>
-            </div>
-        </div>
-
-        <div class="utility-group">
-            <button class="utility-trigger" type="button">
-                <span id="language-label">ENG</span> ▾
-            </button>
-
-            <div class="utility-menu">
-                <label>
-                    <input type="radio" name="language" value="en" checked>
-                    English (EN)
-                </label>
-                <label>
-                    <input type="radio" name="language" value="gr">
-                    Ελληνικά (GR)
-                </label>
-            </div>
-        </div>
-    </section>
 
     <div class="layout">
 
