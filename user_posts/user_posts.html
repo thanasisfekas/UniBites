@@ -36,7 +36,6 @@
 
     <!-- LAYOUT -->
     <div class="layout posts-layout">
-
         <!-- SIDEBAR -->
         <aside class="account-sidebar">
             <section class="account-box">
@@ -106,8 +105,8 @@
                         </div>
                     </article>
 
-                    <!-- CARD -->
-                    <article class="post-card">
+                    <!-- CARD 2 -->
+                    <article class="post-card" data-tags="Pasta,Vegetarian" data-allergens="Milk,Gluten">
                         <div class="post-status-bar no-requests"></div>
                         <div class="post-thumb"></div>
 
@@ -149,7 +148,7 @@
                 </div>
             </section>
             
-            <!--  REQUESTS POPUP -->
+<!---------------------------------------------------------------------------------- REQUESTS MODAL ------------------------------------------------------------------------------------------------------------>
             <div class="requests-modal hidden" id="requestsModal">
                 <div class="modal-overlay"></div>
                 <div class="requests-modal-content">
@@ -166,7 +165,7 @@
                 </div>
             </div>
 
-            <!-- EDIT POST MODAL -->
+<!---------------------------------------------------------------------------------- EDIT POST MODAL ------------------------------------------------------------------------------------------------------------>
             <div class="edit-modal hidden" id="editModal">
                 <div class="modal-overlay"></div>
                 <div class="edit-modal-content">
@@ -176,7 +175,6 @@
                         <h2>Edit Meal Post</h2>
                         <button class="close-edit-modal">✕</button>
                     </div>
-
                     <!-- FORM -->
                     <form class="edit-form">
                         <!-- PAGE 1 -->
@@ -211,48 +209,73 @@
                                 <h3 class="edit-section-title">Meal Tags</h3>
                                 <div class="chip-group">
                                     <label class="chip-option">
+                                        <input type="checkbox" value="Bread">
+                                        <span>Bread</span>
+                                    </label>
+                                    <label class="chip-option">
+                                        <input type="checkbox" value="Dairy">
+                                        <span>Dairy</span>
+                                    </label>
+                                    <label class="chip-option">
+                                        <input type="checkbox" value="Eggs">
+                                        <span>Eggs</span>
+                                    </label>
+                                    <label class="chip-option">
+                                        <input type="checkbox" value="Fish">
+                                        <span>Fish</span>
+                                    </label>
+                                    <label class="chip-option">
+                                        <input type="checkbox" value="Fruits">
+                                        <span>Fruits</span>
+                                    </label>
+                                    <label class="chip-option">
+                                        <input type="checkbox" value="Nuts">
+                                        <span>Nuts</span>
+                                    </label>
+                                    <label class="chip-option">
                                         <input type="checkbox" value="Pasta">
                                         <span>Pasta</span>
                                     </label>
                                     <label class="chip-option">
-                                        <input type="checkbox" value="Vegetarian">
-                                        <span>Vegetarian</span>
+                                        <input type="checkbox" value="Poultry">
+                                        <span>Poultry</span>
+                                    </label>
+                                    <label class="chip-option">
+                                        <input type="checkbox" value="Red Meat">
+                                        <span>Red Meat</span>
                                     </label>
                                     <label class="chip-option">
                                         <input type="checkbox" value="Rice">
                                         <span>Rice</span>
                                     </label>
                                     <label class="chip-option">
-                                        <input type="checkbox" value="Beef">
-                                        <span>Beef</span>
-                                    </label>
-                                    <label class="chip-option">
-                                        <input type="checkbox" value="Chicken">
-                                        <span>Chicken</span>
+                                        <input type="checkbox" value="Vegetables">
+                                        <span>Vegetables</span>
                                     </label>
                                 </div>
                             </section>
                             <!-- ALLERGENS -->
                             <section class="edit-section">
                                 <h3 class="edit-section-title">Allergens</h3>
-                                <div class="chip-group">
-                                    <label class="chip-option allergen-chip">
-                                        <input type="checkbox" value="Gluten">
-                                        <span>Gluten</span>
-                                    </label>
-                                    <label class="chip-option allergen-chip">
-                                        <input type="checkbox" value="Milk">
-                                        <span>Milk</span>
-                                    </label>
-                                    <label class="chip-option allergen-chip">
-                                        <input type="checkbox" value="Peanuts">
-                                        <span>Peanuts</span>
-                                    </label>
-                                    <label class="chip-option allergen-chip">
-                                        <input type="checkbox" value="Soy">
-                                        <span>Soy</span>
-                                    </label>
-                                </div>
+                                    <details class="allergen-dropdown">
+                                        <summary>Select allergens</summary>
+                                        <div class="allergen-list">
+                                            <label><input type="checkbox" value="Gluten"> Gluten</label>
+                                            <label><input type="checkbox" value="Crustaceans"> Crustaceans</label>
+                                            <label><input type="checkbox" value="Eggs"> Eggs</label>
+                                            <label><input type="checkbox" value="Fish"> Fish</label>
+                                            <label><input type="checkbox" value="Peanuts"> Peanuts</label>
+                                            <label><input type="checkbox" value="Soybeans"> Soybeans</label>
+                                            <label><input type="checkbox" value="Milk"> Milk</label>
+                                            <label><input type="checkbox" value="Nuts"> Nuts</label>
+                                            <label><input type="checkbox" value="Celery"> Celery</label>
+                                            <label><input type="checkbox" value="Mustard"> Mustard</label>
+                                            <label><input type="checkbox" value="Sesame Seeds"> Sesame Seeds</label>
+                                            <label><input type="checkbox" value="Sulphur Dioxide and Sulphites"> Sulphur Dioxide and Sulphites</label>
+                                            <label><input type="checkbox" value="Lupin"> Lupin</label>
+                                            <label><input type="checkbox" value="Molluscs"> Molluscs</label>
+                                        </div>
+                                    </details>
                             </section>
                         </div>
 
@@ -288,7 +311,7 @@
                 </div>
             </div>
 
-            <!-- VIEW POST MODAL -->
+<!---------------------------------------------------------------------------------- VIEW POST MODAL ------------------------------------------------------------------------------------------------------------>
             <div class="view-modal hidden" id="viewModal">
                 <div class="modal-overlay"></div>
                 <div class="view-modal-content">
@@ -352,7 +375,6 @@
                             </div>
                         </div>
                     </section>
-
                     <!-- FOOTER -->
                     <div class="view-actions">
                         <button class="btn secondary close-view-btn">Close</button>
@@ -360,16 +382,15 @@
                 </div>
             </div>
 
-            <!-- EXPIRED POSTS (COLLAPSIBLE) -->
+<!---------------------------------------------------------------------------------- EXPIRED POSTS (COLLAPSIBLE) ------------------------------------------------------------------------------------------------------------>
             <section class="posts-section">
-
                 <div class="section-title-collapsible toggle-header collapsed">
                     <span>Expired / Closed Posts</span>
                     <span class="toggle-icon">▲</span>
                 </div>
                 <div class="post-list hidden">
-
-                    <article class="post-list-item" data-rating="4">
+                    <!-- test data -->
+                    <article class="post-list-item" data-rating="4" data-allergens="Gluten,Milk,Eggs">
                         <div class="post-list-info">
                             <h3 class="post-list-title">Spaghetti Bolognese</h3>
                             <p class="post-list-meta">Posted on • 03/04 @ 18:30</p>
@@ -406,7 +427,6 @@
                     </article>
                 </div>
             </section>
-
         </main>
     </div>
 

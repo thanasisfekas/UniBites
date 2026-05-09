@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTheme(savedTheme);
     setLanguage(savedLanguage);
 
+/*----------------------------------------------------------------------------------------------------*/
     /* -----------------------------
        COLLAPSIBLE (EXPIRED POSTS)
     ------------------------------ */
@@ -130,10 +131,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 3 DOT MENU CLICK BEHAVIOR
+    // 3 DOT MENU BEHAVIOR
     document.querySelectorAll(".menu-trigger").forEach(button => {
         button.addEventListener("click", (e) => {
-
             e.stopPropagation();
             const dropdown = button.nextElementSibling;
             // close all other dropdowns first
@@ -153,18 +153,20 @@ document.addEventListener("DOMContentLoaded", () => {
             menu.classList.remove("active");
         });
     });
-    
+
+/*----------------------------------------------------------------------------------------------------*/
+    /* -----------------------------
+       REQUESTS MODAL
+    ------------------------------ */
     const modal = document.getElementById("requestsModal");
     const requestsList = document.querySelector(".requests-list");
     const closeBtn = document.querySelector(".close-requests-modal");
     const overlay = document.querySelector(".modal-overlay");
 
-    /* OPEN REQUESTS MODAL */
+    /* open modal */
     function openRequestsModal(requests) {
         if (!modal) return;
-
         requestsList.innerHTML = "";
-
         requests.forEach(req => {
             const item = document.createElement("div");
             item.classList.add("request-item");
@@ -174,164 +176,144 @@ document.addEventListener("DOMContentLoaded", () => {
                     <strong>${req.name}</strong>
                     <p class="request-time">${req.timestamp}</p>
                 </div>
-
                 <div class="request-actions">
                     <button class="request-btn accept" title="Accept">✓</button>
                     <button class="request-btn decline" title="Decline">✕</button>
                 </div>
             `;
-
             requestsList.appendChild(item);
         });
-
         modal.classList.remove("hidden");
     }
 
-    /* CLOSE MODAL */
+    /* close modal */
     function closeModal() {
         if (!modal) return;
         modal.classList.add("hidden");
     }
 
-    /* EVENTS */
+    /* events */
     closeBtn?.addEventListener("click", closeModal);
     overlay?.addEventListener("click", closeModal);
 
-    /* REQUEST BARS */
+    /* request items */
     document.querySelectorAll(".post-card").forEach((card, index) => {
-
         const post = mockPosts?.[index];
         const statusBar = card.querySelector(".post-status-bar");
 
         if (!post || !statusBar) return;
-
         if (post.hasRequests && post.requests?.length) {
-
             statusBar.textContent = `${post.requests.length} new requests!`;
             statusBar.classList.add("yes-requests");
-
             statusBar.addEventListener("click", (e) => {
                 e.stopPropagation();
                 openRequestsModal(post.requests);
             });
-
         } else {
             statusBar.textContent = "No new requests";
             statusBar.classList.add("no-requests");
         }
     });
 
+/*----------------------------------------------------------------------------------------------------*/
     /* -----------------------------
-    EDIT POST MODAL
+        EDIT POST MODAL
     ----------------------------- */
 
     const editModal = document.getElementById("editModal");
     const closeEditBtn = document.querySelector(".close-edit-modal");
     const cancelEditBtn = document.querySelector(".cancel-edit");
 
-    /* FORM FIELDS */
+    /* fields */
     const editTitle = document.getElementById("editTitle");
     const editDescription = document.getElementById("editDescription");
     const editPortions = document.getElementById("editTotalPortions");
     const editAddress = document.getElementById("editAddress");
     const editPickupTimes = document.getElementById("editPickupTimes");
-    /* TAGS */
+    /* tags */
     const tagButtons = document.querySelectorAll(".edit-tag");
-    /* ALLERGENS */
-    const allergyCheckboxes = document.querySelectorAll('.allergy-list input[type="checkbox"]');
+    /* allergens */
+    const allergenDropdown = document.querySelector(".allergen-dropdown");
+    const allergyCheckboxes = document.querySelectorAll(".allergen-list input[type='checkbox']");
 
-    /* -----------------------------
-    OPEN MODAL
-    ------------------------------ */
-
+    /* open modal */
     function openEditModal(card) {
-        /* TITLE */
+        // retrieve data
         const title = card.querySelector(".post-title")?.textContent.trim() || "";
-        /* DESCRIPTION */
         const description = card.querySelector(".post-description")?.textContent.trim() || "";
-        /* PORTIONS */
         const portions = card.querySelector(".post-portions")?.textContent.replace(" left", "").trim() || "";
-        /* ADDRESS */
         const address = card.querySelector(".post-address")?.textContent.trim() || "";
-        /* PICKUP TIMES */
         const pickupTimes = card.dataset.pickup || "";
-        /* TAGS */
-        const tags = Array.from(card.querySelectorAll(".tag")).map(tag => tag.textContent.trim());
+        const tags = card.dataset.tags
+            ? card.dataset.tags.split(",").map(t => t.trim())
+            : [];
+        const allergens = card.dataset.allergens
+            ? card.dataset.allergens.split(",").map(a => a.trim())
+            : [];
+        const allergensBox = card.querySelector(".post-card");
 
-        /* ALLERGENS */
-        const allergensBox = card.querySelector(".post-allergens");
-        let allergens = [];
-
-        if (allergensBox && !allergensBox.classList.contains("no-allergens")) {
-            allergens = allergensBox.textContent.replace("Contains:", "").split(",").map(a => a.trim());
+        if (allergensBox?.dataset.allergens) {
+            allergens = allergensBox.dataset.allergens
+                .split(",")
+                .map(a => a.trim())
+                .filter(Boolean);
         }
 
-        /* FILL FORM */
+        /* fill fields */
         editTitle.value = title;
         editDescription.value = description;
         editPortions.value = portions;
         editAddress.value = address;
         editPickupTimes.value = pickupTimes;
-
-        /* RESET TAGS */
-        tagButtons.forEach(btn => {
-            btn.classList.remove("selected");
-
-            if (tags.includes(btn.dataset.tag)) {
-                btn.classList.add("selected");
-            }
-        });
-
-        /* RESET ALLERGENS */
+        /* reset tags */
+        tagButtons.forEach(btn => { btn.classList.remove("selected");
+        if (tags.includes(btn.dataset.tag)) { btn.classList.add("selected"); } });
+        /* reset allergens */
         allergyCheckboxes.forEach(cb => {
             cb.checked = allergens.includes(cb.value);
         });
 
-        /* SHOW MODAL */
+        document.addEventListener("click", (e) => {
+            if (allergenDropdown && allergenDropdown.open && !allergenDropdown.contains(e.target)) {
+                allergenDropdown.removeAttribute("open");
+            }
+        });
+
+        /* show modal */
         editModal.classList.remove("hidden");
+        /* always show first page */
+        showEditPage(1);
+        /* always scroll to top */
+        editModal.querySelector(".edit-modal-content").scrollTop = 0;
     }
 
-    /* -----------------------------
-    CLOSE MODAL
-    ------------------------------ */
-
+    /* close modal */
     function closeEditModal() {
         editModal.classList.add("hidden");
     }
 
-    /* -----------------------------
-    EDIT BUTTON CLICK
-    ------------------------------ */
-
+    /* edit button */
     document.querySelectorAll(".menu-dropdown .edit-post").forEach(editBtn => {
             editBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 const card = editBtn.closest(".post-card");
                 openEditModal(card);
 
-                /* CLOSE DROPDOWN */
+                /* close dropdown */
                 editBtn.closest(".menu-dropdown").classList.remove("active");
             });
         });
 
-    /* -----------------------------
-    TAG SELECTION
-    ------------------------------ */
-
+    /* tag selection */
     tagButtons.forEach(btn => {
-
         btn.addEventListener("click", () => {
             btn.classList.toggle("selected");
         });
     });
 
-    /* -----------------------------
-    SAVE CHANGES
-    ------------------------------ */
-
+    /* save changes */
     document.querySelector(".save-edit")
         .addEventListener("click", () => {
-
             console.log({
                 title: editTitle.value,
                 description: editDescription.value,
@@ -400,30 +382,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     showEditPage(1);
 
-    /* IMAGE RESET */
+    /* image reset */
     imagePreview.innerHTML = "No Image Set";
     imageInput.value = "";
 
-    /* -----------------------------
-    CLOSE EVENTS
-    ------------------------------ */
-
+    /* close events */
     closeEditBtn.addEventListener("click", closeEditModal);
     cancelEditBtn.addEventListener("click", closeEditModal);
 
-    /* CLICK OUTSIDE */
-    editModal.querySelector(".modal-overlay")
-        .addEventListener("click", closeEditModal);
+    /* close modal when clicking outside */
+    editModal.querySelector(".modal-overlay").addEventListener("click", closeEditModal);
 
+/*----------------------------------------------------------------------------------------------------*/
     /* -----------------------------
-    VIEW DETAILS MODAL
+        VIEW DETAILS MODAL
     ----------------------------- */
 
     const viewModal = document.getElementById("viewModal");
     const closeViewBtn = document.querySelector(".close-view-modal");
     const closeViewFooterBtn = document.querySelector(".close-view-btn");
 
-    /* VIEW FIELDS */
+    /* fields */
     const viewTitle = document.getElementById("viewTitle");
     const viewPortions = document.getElementById("viewPortions");
     const viewDescription = document.getElementById("viewDescription");
@@ -435,16 +414,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const viewPostedDate = document.getElementById("viewPostedDate");
     const viewRating = document.getElementById("viewRating");
 
-    /* OPEN MODAL */
+    function renderAllergens(allergens) {
+        if (!allergens || allergens.length === 0) {
+            viewAllergens.innerHTML =
+                `<span class="no-allergens">No allergens noted</span>`;
+            return;
+        }
+
+        viewAllergens.innerHTML = allergens
+            .map(allergen =>
+                `<span class="view-chip allergen-view-chip">${allergen}</span>`
+            )
+            .join("");
+    }
+
+    /* open modal */
     function openViewModal(postItem) {
-        /* title */
         const title = postItem.querySelector(".post-list-title")?.textContent || "";
-        /* date */
-        const meta =
-            postItem.querySelector(".post-list-meta")?.textContent || "";
-        /* rating */
+        const meta = postItem.querySelector(".post-list-meta")?.textContent || "";
         const rating = postItem.dataset.rating || 0;
-        /* fill modal */
+        const allergens = postItem.dataset.allergens? postItem.dataset.allergens.split(",").map(a => a.trim()): [];
         viewTitle.textContent = title;
         /* placeholder values */
         viewPortions.textContent = "5";
@@ -453,24 +442,30 @@ document.addEventListener("DOMContentLoaded", () => {
         viewPickupTimes.textContent = "18:00 - 21:00";
         /* image placeholder */
         viewImage.innerHTML = "No Image Set";
-        /*placeholder tags */
+        /* tags placeholder */
         viewTags.innerHTML = `<span class="view-chip">Pasta</span><span class="view-chip">Vegetarian</span>`;
-        /* sample allergens */
-        viewAllergens.innerHTML = `<span class="view-chip allergen-view-chip">Gluten</span>`;
+        /* allergens */
+        if (allergens.length === 0) {
+            viewAllergens.innerHTML = `<span class="view-no-allergens">No allergens noted</span>`;
+        } else {
+            viewAllergens.innerHTML = allergens.map(a => `<span class="view-chip allergen-view-chip">${a}</span>`).join("");
+        }
         viewPostedDate.textContent = meta;
         /* star rating */
         viewRating.textContent = `${Number(rating).toFixed(1)} ★`;
         /* show modal */
         viewModal.classList.remove("hidden");
+        // always open at top
+        viewModal.querySelector(".view-modal-content").scrollTop = 0;
         
     }
 
-    /* CLOSE */
+    /* close */
     function closeViewModal() {
         viewModal.classList.add("hidden");
     }
 
-    /* OPEN EVENTS */
+    /* open events */
     document.querySelectorAll(".view-details-btn")
         .forEach(button => {
             button.addEventListener("click", () => {
@@ -479,12 +474,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-    /* CLOSE EVENTS */
+    /* close events */
     closeViewBtn.addEventListener("click", closeViewModal);
-
     closeViewFooterBtn.addEventListener("click", closeViewModal);
 
-    /* OVERLAY CLICK */
+    /* close modal when clicking outside */
     viewModal.querySelector(".modal-overlay").addEventListener("click", closeViewModal);
 
 });

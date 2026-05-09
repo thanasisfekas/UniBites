@@ -7,29 +7,27 @@
     --menu-bg-light: #e8ddd0;
     --menu-bg-dark: #26211d;
 
-    /* NEUTRALS */
+    /* gray neutrals */
     --gray-100: #f5f5f5;
     --gray-200: #e0e0e0;
     --gray-500: #777;
 
-    /* SUCCESS */
     --green-bg: #e6f4ea;
     --green-bg-hover: #c3f8d2;
     --green-text: #2e7d32;
-
-    /* ERROR */
     --red-bg: #fdecea;
     --red-bg-hover: #f8c7c3;
     --red-text: #c62828;
 
-    /* FONT SCALE */
     --font-xs: 12px;
     --font-sm: 14px;
     --font-md: 16px;
     --font-lg: 20px;
 }
 
-/* BODY */
+/* ------------------------------
+    BODY
+------------------------------ */
 body {
     margin: 0;
     font-family: "Trebuchet MS", Helvetica, sans-serif;
@@ -37,7 +35,9 @@ body {
     color: var(--text-dark);
 }
 
-/* TOPBAR */
+/* ------------------------------
+    TOPBAR 
+------------------------------ */
 .topbar {
     display: flex;
     justify-content: space-between;
@@ -55,7 +55,9 @@ body {
     text-decoration: none;
 }
 
-/* UTILITY BAR */
+/* ------------------------------
+    UTILITY BAR 
+------------------------------ */
 .utility-bar {
     display: flex;
     align-items: flex-start;
@@ -97,7 +99,9 @@ body {
     display: flex;
 }
 
-/* SIDEBAR */
+/* ------------------------------
+    SIDEBAR 
+------------------------------ */
 .account-sidebar {
     padding: 20px 16px;
     background-color: var(--bg-light);
@@ -152,7 +156,9 @@ body {
     opacity: 0.7;
 }
 
-/* LAYOUT */
+/* ------------------------------
+    LAYOUT 
+------------------------------ */
 .posts-layout {
     display: grid;
     grid-template-columns: 240px 1fr;
@@ -164,19 +170,21 @@ body {
     padding: 20px;
 }
 
-/*----------------------------------------------------------------------*/
-/* POSTS GRID (ACTIVE) */
+/*----------------------------------------------------------------------------------------------------*/
+/* ------------------------------
+    POSTS CARDS (ACTIVE) 
+------------------------------ */
 .posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 480px));
-    gap: 32px;
+    grid-template-columns: repeat(3, minmax(280px, 1fr));
+    gap: 28px;
 }
 
-/* CARD */
 .post-card {
     position: relative;
     width: 100%;
-    max-width: 480px;
+    min-width: 0;
+    max-width: 100%;
     background: var(--bg-light);
     border-radius: 12px;
     border: 1px solid rgba(0,0,0,0.2);
@@ -187,25 +195,21 @@ body {
     border: 1px solid var(--primary);
 }
 
-/* THUMB */
 .post-thumb {
     height: 150px;
     background: var(--gray-200);
 }
 
-/* BODY */
 .post-body {
     padding: 12px;
 }
 
-/* HEADER */
 .post-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* TITLE + PORTIONS */
 .post-title-group {
     display: flex;
     align-items: center;
@@ -226,14 +230,33 @@ body {
     border-radius: 999px;
 }
 
-/* MENU */
+.post-description {
+    font-size: var(--font-sm);
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.post-meta {
+    font-size: var(--font-xs);
+    color: var(--gray-500);
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ------------------------------
+    MENU - EDIT & DELETE (3 dots) 
+------------------------------ */
 .post-menu {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-/* 3 DOT BUTTON */
 .menu-trigger {
     width: 36px;
     height: 36px;
@@ -257,7 +280,6 @@ body {
     height: 24px;
 }
 
-/* DROPDOWN */
 .menu-dropdown {
     display: none;
     position: absolute;
@@ -291,25 +313,10 @@ body {
     color: var(--red-text);
 }
 
-.post-description {
-    font-size: var(--font-sm);
-    color: var(--text-dark);
-    margin-bottom: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 
-.post-meta {
-    font-size: var(--font-xs);
-    color: var(--gray-500);
-    margin-top: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* TAGS */
+/* ------------------------------
+    TAGS
+------------------------------ */
 .post-tags {
     display: flex;
     gap: 6px;
@@ -326,7 +333,9 @@ body {
     font-size: var(--font-xs);
 }
 
-/* ALLERGENS */
+/* ------------------------------
+    ALLERGENS (warning message)
+------------------------------ */
 .post-allergens {
     margin-top: 10px;
     padding: 8px;
@@ -344,7 +353,9 @@ body {
     color: var(--red-text);
 }
 
-/* STATUS BAR */
+/* ------------------------------
+    STATUS BAR (pending requests) 
+ ------------------------------ */
 .post-status-bar {
     padding: 8px 14px;
     font-size: var(--font-sm);
@@ -368,8 +379,10 @@ body {
     background: rgba(204, 85, 0, 0.15);
 }
 
-/*----------------------------------------------------------------------*/
-/* EXPIRED POSTS */
+/*----------------------------------------------------------------------------------------------------*/
+/* ------------------------------
+    EXPIRED POSTS (collapsible list)
+ ------------------------------ */
 .post-list {
     display: flex;
     flex-direction: column;
@@ -409,49 +422,17 @@ body {
     color: var(--gray-500);
 }
 
-/* BUTTON */
-.btn {
-    border: none;
-    border-radius: 999px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: var(--font-sm);
-    transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.btn:hover {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}   
-
-.btn:active {
-    transform: translateY(1px);
-}
-
-.btn.primary {
-    background-color: var(--primary);
-    color: var(--text-light);
-}
-
-.btn.secondary {
-    background-color: var(--text-light);
-    border: 1px solid var(--primary);
-    color: var(--primary);
-}
-
-/* SECTION TITLES */
+/* section title */
 .posts-section {
     margin-bottom: 30px;
 }
 
-/* ACTIVE */
 .section-title {
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 12px;
 }
 
-/* COLLAPSIBLE */
 .section-title-collapsible {
     display: block;
     background-color: var(--text-dark);
@@ -485,7 +466,7 @@ body {
     transform: rotate(180deg);
 }
 
-.post-requests {
+/*.post-requests {
     border-top: 1px solid rgba(0,0,0,0.08);
     padding: 10px 12px;
     font-size: var(--font-sm);
@@ -496,10 +477,56 @@ body {
 
 .post-requests:hover {
     background: rgba(204, 85, 0, 0.08);
+}*/
+
+/* ------------------------------
+    BUTTON
+------------------------------ */
+.btn {
+    border: none;
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: var(--font-sm);
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/*----------------------------------------------------------------------*/
-/* REQUESTS MODAL */
+.btn:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}   
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn.primary {
+    background-color: var(--primary);
+    color: var(--text-light);
+}
+
+.btn.secondary {
+    background-color: var(--text-light);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+
+
+/*----------------------------------------------------------------------------------------------------*/
+/* ------------------------------
+    BLURED BACKGROUND FOR MODALS
+------------------------------ */
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.2);
+}
+
+/* ------------------------------
+    REQUESTS MODAL 
+------------------------------ */
 .requests-modal {
     position: fixed;
     inset: 0;
@@ -513,15 +540,6 @@ body {
     display: none;
 }
 
-/* BLURED BACKGROUND */
-.modal-overlay {
-    position: absolute;
-    inset: 0;
-    backdrop-filter: blur(5px);
-    background: rgba(0,0,0,0.2);
-}
-
-/* POPUP */
 .requests-modal-content {
     position: relative;
     background: var(--bg-light);
@@ -542,7 +560,6 @@ body {
     align-self: flex-end;
 }
 
-/* REQUEST ITEM */
 .request-item {
     display: flex;
     justify-content: space-between;
@@ -561,7 +578,7 @@ body {
     margin: 2px 0 0;
 }
 
-/* ACTION BUTTONS */
+/* request buttons */
 .request-actions {
     display: flex;
     gap: 8px;
@@ -606,7 +623,9 @@ body {
 }
 
 /*----------------------------------------------------------------------*/
-/* EDIT MODAL */
+/* ------------------------------
+    EDIT MODAL
+------------------------------*/
 .edit-modal {
     position: fixed;
     inset: 0;
@@ -620,7 +639,6 @@ body {
     display: none;
 }
 
-/* MODAL BOX */
 .edit-modal-content {
     position: relative;
     width: min(900px, 92vw);
@@ -637,7 +655,6 @@ body {
 }
 
 
-/* HEADER */
 .edit-modal-header {
     display: flex;
     justify-content: space-between;
@@ -665,7 +682,6 @@ body {
     background: rgba(0,0,0,0.06);
 }
 
-/* FORM STRUCTURE */
 .edit-form {
     display: flex;
     flex-direction: column;
@@ -704,7 +720,6 @@ body {
     gap: 16px;
 }
 
-/* FIELDS */
 .edit-field {
     display: flex;
     flex-direction: column;
@@ -742,7 +757,6 @@ body {
     box-shadow: 0 0 0 3px rgba(204, 85, 0, 0.12);
 }
 
-/* IMAGE PREVIEW */
 .image-preview-wrapper {
     display: flex;
     flex-direction: column;
@@ -769,7 +783,7 @@ body {
     object-fit: cover;
 }
 
-/* TAGS + ALLERGENS (CHIPS) */
+/* chips (tags) */
 .chip-group {
     display: flex;
     flex-wrap: wrap;
@@ -801,7 +815,86 @@ body {
     font-weight: 500;
 }
 
-/* PAGE SYSTEM */
+/* checklist (allergens) */ 
+.allergen-dropdown {
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: var(--bg-light);
+    transition: all 0.2s ease;
+}
+
+/* highlighted when expanded */
+.allergen-dropdown[open] {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(204, 85, 0, 0.12);
+}
+
+/* checklist header */
+.allergen-dropdown summary {
+    cursor: pointer;
+    list-style: none;
+    color: var(--text-dark);
+    display: flex;
+    gap: 6px;
+    font: inherit;
+    align-items: center;
+}
+
+.allergen-dropdown summary::after {
+    content: "▼";
+    transition: transform 0.2s ease;
+    font-size: 14px;
+}
+
+.allergen-dropdown[open] summary::after {
+    transform: rotate(180deg);
+}
+
+/* do not use default marker */
+.allergen-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.allergen-list {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+/* checklist items */
+.allergen-list label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--gray-500);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+}
+
+.allergen-list label:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(204, 85, 0, 0.12);
+}
+
+.allergen-list input[type="checkbox"] {
+    accent-color: var(--primary);
+    transform: scale(1.15);
+}
+
+/* selected state */
+.allergen-list label:has(input:checked) {
+    border-color: var(--primary);
+    font-weight: 600;
+}
+
+/* page system */
 .edit-page {
     display: none;
 }
@@ -810,15 +903,15 @@ body {
     display: block;
 }
 
-/* FOOTER (NAV + ACTIONS) */
+/* footer (buttons for navigation + actions) */
 .edit-footer {
     margin-top: auto;
     display: flex;
     flex-direction: column;
     gap: 34px;
+    padding-bottom: 32px;
 }
 
-/* NAVIGATION */
 .edit-page-nav {
     display: flex;
     align-items: center;
@@ -835,7 +928,6 @@ body {
     justify-content: flex-start;
 }
 
-/* ACTION BUTTONS */
 .edit-actions {
     display: flex;
     justify-content: flex-end;
@@ -847,8 +939,10 @@ body {
     padding-top: 6px;
 }
 
-/*----------------------------------------------------------------------*/
-/* VIEW DETAILS MODAL */
+/*----------------------------------------------------------------------------------------------------*/
+/* ------------------------------
+    VIEW DETAILS MODAL 
+------------------------------*/
 .view-modal {
     position: fixed;
     inset: 0;
@@ -862,7 +956,6 @@ body {
     display: none;
 }
 
-/* BOX */
 .view-modal-content {
     width: min(950px, 94vw);
     max-height: 92vh;
@@ -878,7 +971,6 @@ body {
     z-index: 1;
 }
 
-/* HEADER */
 .view-modal-header {
     display: flex;
     justify-content: space-between;
@@ -890,7 +982,6 @@ body {
     font-size: 1.5rem;
 }
 
-/* CLOSE */
 .close-view-modal {
     width: 36px;
     height: 36px;
@@ -907,7 +998,6 @@ body {
     background: rgba(0,0,0,0.06);
 }
 
-/* IMAGE */
 .view-image-wrapper {
     display: flex;
     flex-direction: column;
@@ -932,7 +1022,6 @@ body {
     object-fit: cover;
 }
 
-/* SECTIONS */
 .view-section {
     display: flex;
     flex-direction: column;
@@ -953,14 +1042,12 @@ body {
     color: var(--text-dark);
 }
 
-/* GRID */
 .view-grid {
     display: grid;
     grid-template-columns: 1fr 220px;
     gap: 16px;
 }
 
-/* FIELD */
 .view-field {
     display: flex;
     flex-direction: column;
@@ -973,7 +1060,6 @@ body {
     color: var(--text-dark);
 }
 
-/* VALUES */
 .view-value,
 .view-description {
     background: var(--bg-light);
@@ -988,7 +1074,7 @@ body {
     white-space: pre-wrap;
 }
 
-/* CHIPS */
+/* chips (tags + allergens) */
 .view-chip-group {
     display: flex;
     flex-wrap: wrap;
@@ -1005,7 +1091,15 @@ body {
     font-weight: 500;
 }
 
-/* FOOTER */
+/* no allergens message */
+.view-no-allergens {
+    color: var(--gray-500);
+    font-weight: 600;
+    font-style: italic;
+    padding: 8px 0;
+}
+
+/* footer */
 .view-actions {
     display: flex;
     justify-content: flex-end;
@@ -1025,19 +1119,18 @@ body {
     color: var(--primary);
     font-size: var(--font-lg);
     font-weight: 600;
-    letter-spacing: 0.5px;
 }
 
-/*----------------------------------------------------------------------*/
-/* COLLAPSE BEHAVIOR */
+/*----------------------------------------------------------------------------------------------------*/
+/* HIDE MODAL */
 .hidden {
     display: none;
 }
 
 
-/* =========================================
+/* ------------------------------
    RESPONSIVE
-========================================= */
+------------------------------ */
 
 @media (max-width: 700px) {
 
