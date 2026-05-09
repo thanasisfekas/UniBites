@@ -156,15 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const modal = document.getElementById("requestsModal");
     const requestsList = document.querySelector(".requests-list");
-    const closeBtn = document.querySelector(".close-modal");
+    const closeBtn = document.querySelector(".close-requests-modal");
     const overlay = document.querySelector(".modal-overlay");
 
-    /* SAFETY CHECK */
-    if (!modal || !requestsList || !closeBtn || !overlay) {
-        console.error("Modal elements missing from HTML");
-    }
-
-    /* OPEN MODAL */
+    /* OPEN REQUESTS MODAL */
     function openRequestsModal(requests) {
         if (!modal) return;
 
@@ -225,4 +220,271 @@ document.addEventListener("DOMContentLoaded", () => {
             statusBar.classList.add("no-requests");
         }
     });
+
+    /* -----------------------------
+    EDIT POST MODAL
+    ----------------------------- */
+
+    const editModal = document.getElementById("editModal");
+    const closeEditBtn = document.querySelector(".close-edit-modal");
+    const cancelEditBtn = document.querySelector(".cancel-edit");
+
+    /* FORM FIELDS */
+    const editTitle = document.getElementById("editTitle");
+    const editDescription = document.getElementById("editDescription");
+    const editPortions = document.getElementById("editTotalPortions");
+    const editAddress = document.getElementById("editAddress");
+    const editPickupTimes = document.getElementById("editPickupTimes");
+    /* TAGS */
+    const tagButtons = document.querySelectorAll(".edit-tag");
+    /* ALLERGENS */
+    const allergyCheckboxes = document.querySelectorAll('.allergy-list input[type="checkbox"]');
+
+    /* -----------------------------
+    OPEN MODAL
+    ------------------------------ */
+
+    function openEditModal(card) {
+        /* TITLE */
+        const title = card.querySelector(".post-title")?.textContent.trim() || "";
+        /* DESCRIPTION */
+        const description = card.querySelector(".post-description")?.textContent.trim() || "";
+        /* PORTIONS */
+        const portions = card.querySelector(".post-portions")?.textContent.replace(" left", "").trim() || "";
+        /* ADDRESS */
+        const address = card.querySelector(".post-address")?.textContent.trim() || "";
+        /* PICKUP TIMES */
+        const pickupTimes = card.dataset.pickup || "";
+        /* TAGS */
+        const tags = Array.from(card.querySelectorAll(".tag")).map(tag => tag.textContent.trim());
+
+        /* ALLERGENS */
+        const allergensBox = card.querySelector(".post-allergens");
+        let allergens = [];
+
+        if (allergensBox && !allergensBox.classList.contains("no-allergens")) {
+            allergens = allergensBox.textContent.replace("Contains:", "").split(",").map(a => a.trim());
+        }
+
+        /* FILL FORM */
+        editTitle.value = title;
+        editDescription.value = description;
+        editPortions.value = portions;
+        editAddress.value = address;
+        editPickupTimes.value = pickupTimes;
+
+        /* RESET TAGS */
+        tagButtons.forEach(btn => {
+            btn.classList.remove("selected");
+
+            if (tags.includes(btn.dataset.tag)) {
+                btn.classList.add("selected");
+            }
+        });
+
+        /* RESET ALLERGENS */
+        allergyCheckboxes.forEach(cb => {
+            cb.checked = allergens.includes(cb.value);
+        });
+
+        /* SHOW MODAL */
+        editModal.classList.remove("hidden");
+    }
+
+    /* -----------------------------
+    CLOSE MODAL
+    ------------------------------ */
+
+    function closeEditModal() {
+        editModal.classList.add("hidden");
+    }
+
+    /* -----------------------------
+    EDIT BUTTON CLICK
+    ------------------------------ */
+
+    document.querySelectorAll(".menu-dropdown .edit-post").forEach(editBtn => {
+            editBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                const card = editBtn.closest(".post-card");
+                openEditModal(card);
+
+                /* CLOSE DROPDOWN */
+                editBtn.closest(".menu-dropdown").classList.remove("active");
+            });
+        });
+
+    /* -----------------------------
+    TAG SELECTION
+    ------------------------------ */
+
+    tagButtons.forEach(btn => {
+
+        btn.addEventListener("click", () => {
+            btn.classList.toggle("selected");
+        });
+    });
+
+    /* -----------------------------
+    SAVE CHANGES
+    ------------------------------ */
+
+    document.querySelector(".save-edit")
+        .addEventListener("click", () => {
+
+            console.log({
+                title: editTitle.value,
+                description: editDescription.value,
+                portions: editPortions.value,
+                address: editAddress.value,
+                pickupTimes: editPickupTimes.value,
+                tags: Array.from(tagButtons).filter(btn => btn.classList.contains("selected")).map(btn => btn.dataset.tag),
+                allergens: Array.from(allergyCheckboxes).filter(cb => cb.checked).map(cb => cb.value)
+            });
+
+            /*
+            send data to backend
+            */
+
+            closeEditModal();
+        });
+
+    let currentEditPage = 1;
+
+    const page1 = document.getElementById("editPage1");
+    const page2 = document.getElementById("editPage2");
+
+    const nextBtn = document.querySelector(".next-edit-page");
+    const prevBtn = document.querySelector(".prev-edit-page");
+
+    function showEditPage(page) {
+        currentEditPage = page;
+
+        page1.classList.toggle("active", page === 1);
+        page2.classList.toggle("active", page === 2);
+
+        if (page === 1) {
+            nextBtn.style.display = "inline-flex";
+            prevBtn.style.display = "none";
+        } else {
+            nextBtn.style.display = "none";
+            prevBtn.style.display = "inline-flex";
+        }
+        editModal.classList.toggle("page-2", page === 2);
+    }
+
+    nextBtn.addEventListener("click", () => {
+        showEditPage(2);
+    });
+    prevBtn.addEventListener("click", () => {
+        showEditPage(1);
+    });
+
+    const imageInput = document.getElementById("editImage");
+    const imagePreview = document.getElementById("editImagePreview");
+
+    imageInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+            imagePreview.innerHTML = "No Image Set";
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            imagePreview.innerHTML = `<img src="${event.target.result}" />`;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    showEditPage(1);
+
+    /* IMAGE RESET */
+    imagePreview.innerHTML = "No Image Set";
+    imageInput.value = "";
+
+    /* -----------------------------
+    CLOSE EVENTS
+    ------------------------------ */
+
+    closeEditBtn.addEventListener("click", closeEditModal);
+    cancelEditBtn.addEventListener("click", closeEditModal);
+
+    /* CLICK OUTSIDE */
+    editModal.querySelector(".modal-overlay")
+        .addEventListener("click", closeEditModal);
+
+    /* -----------------------------
+    VIEW DETAILS MODAL
+    ----------------------------- */
+
+    const viewModal = document.getElementById("viewModal");
+    const closeViewBtn = document.querySelector(".close-view-modal");
+    const closeViewFooterBtn = document.querySelector(".close-view-btn");
+
+    /* VIEW FIELDS */
+    const viewTitle = document.getElementById("viewTitle");
+    const viewPortions = document.getElementById("viewPortions");
+    const viewDescription = document.getElementById("viewDescription");
+    const viewAddress = document.getElementById("viewAddress");
+    const viewPickupTimes = document.getElementById("viewPickupTimes");
+    const viewImage = document.getElementById("viewImage");
+    const viewTags = document.getElementById("viewTags");
+    const viewAllergens = document.getElementById("viewAllergens");
+    const viewPostedDate = document.getElementById("viewPostedDate");
+    const viewRating = document.getElementById("viewRating");
+
+    /* OPEN MODAL */
+    function openViewModal(postItem) {
+        /* title */
+        const title = postItem.querySelector(".post-list-title")?.textContent || "";
+        /* date */
+        const meta =
+            postItem.querySelector(".post-list-meta")?.textContent || "";
+        /* rating */
+        const rating = postItem.dataset.rating || 0;
+        /* fill modal */
+        viewTitle.textContent = title;
+        /* placeholder values */
+        viewPortions.textContent = "5";
+        viewDescription.textContent = "Fresh pasta with tomato sauce and basil.";
+        viewAddress.textContent = "Aratou 60, Patras";
+        viewPickupTimes.textContent = "18:00 - 21:00";
+        /* image placeholder */
+        viewImage.innerHTML = "No Image Set";
+        /*placeholder tags */
+        viewTags.innerHTML = `<span class="view-chip">Pasta</span><span class="view-chip">Vegetarian</span>`;
+        /* sample allergens */
+        viewAllergens.innerHTML = `<span class="view-chip allergen-view-chip">Gluten</span>`;
+        viewPostedDate.textContent = meta;
+        /* star rating */
+        viewRating.textContent = `${Number(rating).toFixed(1)} ★`;
+        /* show modal */
+        viewModal.classList.remove("hidden");
+        
+    }
+
+    /* CLOSE */
+    function closeViewModal() {
+        viewModal.classList.add("hidden");
+    }
+
+    /* OPEN EVENTS */
+    document.querySelectorAll(".view-details-btn")
+        .forEach(button => {
+            button.addEventListener("click", () => {
+                const postItem = button.closest(".post-list-item");
+                openViewModal(postItem);
+            });
+        });
+
+    /* CLOSE EVENTS */
+    closeViewBtn.addEventListener("click", closeViewModal);
+
+    closeViewFooterBtn.addEventListener("click", closeViewModal);
+
+    /* OVERLAY CLICK */
+    viewModal.querySelector(".modal-overlay").addEventListener("click", closeViewModal);
+
 });
