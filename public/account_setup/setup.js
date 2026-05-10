@@ -136,6 +136,13 @@
         pip2.classList.add('active');
         updateStepLabel(2);
         setTimeout(() => { initMap(); map.invalidateSize(); }, 60);
+
+		// const allergySelected = document.querySelectorAll('.allergy-chip.selected input');
+		// allergySelected.forEach((allergy=>{
+        //     console.log(allergy.value);
+        //     allergy = allergy.value;
+        // }));
+
     });
 
     btnBack.addEventListener('click', () => {
