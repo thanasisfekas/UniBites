@@ -137,11 +137,31 @@
         updateStepLabel(2);
         setTimeout(() => { initMap(); map.invalidateSize(); }, 60);
 
-		// const allergySelected = document.querySelectorAll('.allergy-chip.selected input');
-		// allergySelected.forEach((allergy=>{
-        //     console.log(allergy.value);
-        //     allergy = allergy.value;
-        // }));
+		const allergySelected = document.querySelectorAll('.allergy-chip.selected input');
+        let i = 1;
+
+        let allergyJson = {
+            allergies: []
+        };
+        
+		allergySelected.forEach((allergy=>{
+            // console.log(allergy.value);
+            allergyJson.allergies.push(allergy.value);
+        }));
+        //console.log(allergyJson);
+
+        // send user allergies
+        const promise =fetch("/api/user/allergies", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(allergyJson)
+        })
+        .then(response => response.json())
+        .then(data => console.log("Allergies saved:", data))
+        .catch((error) => console.log("Error saving allergies:",error));
+
 
     });
 
