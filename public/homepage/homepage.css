@@ -139,17 +139,29 @@ body.theme-dark .topbar {
     display: flex;
     justify-content: center;
     width: 100%;
-    padding: 6px 0;
+    padding: 14px 16px;
+    box-sizing: border-box;
+}
+
+.address-panel {
+    width: min(760px, 100%);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .address-btn {
+    align-self: center;
+    max-width: 100%;
     padding: 8px 12px;
     border-radius: 999px;
     border: 1px solid rgba(16, 12, 8, 0.3);
     background-color: var(--bg-light);
+    color: var(--text-dark);
     cursor: pointer;
     font-size: 14px;
+    overflow-wrap: anywhere;
 }
 
 body.theme-dark .address-btn {
@@ -160,9 +172,10 @@ body.theme-dark .address-btn {
 
 .address-dropdown {
     position: absolute;
-    top: calc(100% + 4px);
+    top: 40px;
     left: 50%;
     transform: translateX(-50%);
+    width: min(340px, calc(100vw - 32px));
     min-width: 220px;
     padding: 8px 0;
     margin: 0;
@@ -171,7 +184,8 @@ body.theme-dark .address-btn {
     border: 1px solid rgba(16,12,8,0.15);
     background: var(--bg-light);
     display: none;
-    z-index: 20;
+    z-index: 1000;
+    overflow: hidden;
 }
 
 .address-dropdown.show {
@@ -182,15 +196,130 @@ body.theme-dark .address-btn {
     padding: 8px 16px;
     cursor: pointer;
     font-size: 14px;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .address-dropdown li:hover {
     background-color: var(--menu-bg-light);
 }
 
+body.theme-dark .address-dropdown {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    border-color: rgba(247,230,214,0.18);
+}
+
+body.theme-dark .address-dropdown li:hover {
+    background-color: var(--menu-bg-dark);
+}
+
 .address-dropdown .add-new {
     color: var(--primary);
     font-weight: bold;
+}
+
+.homepage-address-map-panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.homepage-address-map-panel[hidden] {
+    display: none;
+}
+
+.homepage-address-search-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.homepage-address-input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 2px solid var(--primary);
+    border-radius: 7px;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    color: var(--text-dark);
+    transition: box-shadow 0.2s;
+}
+
+.homepage-address-input:focus {
+    outline: none;
+    box-shadow: 0 0 6px rgba(204, 85, 0, 0.35);
+}
+
+body.theme-dark .homepage-address-input {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    border-color: var(--primary);
+}
+
+.homepage-search-btn {
+    padding: 12px 20px;
+    background-color: var(--primary);
+    color: var(--text-light);
+    border: none;
+    border-radius: 7px;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.homepage-search-btn:hover,
+.homepage-search-btn:focus-visible {
+    background-color: #d96605;
+}
+
+.homepage-search-btn:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.homepage-geo-error {
+    font-size: 13px;
+    color: #cc3300;
+    margin: 0;
+}
+
+#homepage-map {
+    width: 100%;
+    height: 300px;
+    border-radius: 10px;
+    border: 2px solid var(--primary);
+    box-sizing: border-box;
+    z-index: 0;
+}
+
+.homepage-add-address-btn {
+    display: block;
+    width: 100%;
+    padding: 11px;
+    background-color: transparent;
+    border: 2px dashed var(--primary);
+    border-radius: 7px;
+    color: var(--primary);
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.18s;
+}
+
+.homepage-add-address-btn:hover,
+.homepage-add-address-btn:focus-visible {
+    background-color: rgba(204, 85, 0, 0.08);
 }
 
 /* ------------------------------
@@ -1112,5 +1241,17 @@ body.theme-dark .address-btn {
 @media (max-width: 700px) {
     .feed-grid {
         grid-template-columns: 1fr;
+    }
+
+    .homepage-address-search-row {
+        flex-direction: column;
+    }
+
+    .homepage-search-btn {
+        width: 100%;
+    }
+
+    #homepage-map {
+        height: 260px;
     }
 }

@@ -13,7 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
             dark: 'Dark',
             light: 'Light',
             welcome: 'Welcome back, Student',
-            subtitle: 'Fresh meal offerings near you.'
+            subtitle: 'Fresh meal offerings near you.',
+            geoNotFound: 'Address not found. Try a more specific address.',
+            geoError: 'Could not look up this address. Please try again.',
+            geoMapUnavailable: 'Map could not be loaded. Check your connection and refresh.'
         },
         gr: {
             chooseTheme: 'Επιλογή Θέματος',
@@ -24,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    let currentLang = 'en';
+
     const setTheme = (theme) => {
         document.body.classList.remove('theme-light', 'theme-dark');
         document.body.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
@@ -31,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setLanguage = (lang) => {
-        const selected = dictionary[lang] || dictionary.en;
+        currentLang = dictionary[lang] ? lang : 'en';
+        const selected = dictionary[currentLang];
 
         if (languageLabel) {
             languageLabel.textContent = lang === 'gr' ? 'ΕΛΛ' : 'ENG';
@@ -48,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (heading) heading.textContent = selected.welcome;
         if (subtitle) subtitle.textContent = selected.subtitle;
 
-        localStorage.setItem('unibites-language', lang);
+        localStorage.setItem('unibites-language', currentLang);
     };
 
     /* LOAD SAVED SETTINGS */
@@ -81,15 +87,184 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ------------------------------
-       ADDRESS DROPDOWN
+       ADDRESS MAP + DROPDOWN
     ------------------------------ */
     const addressBtn = document.querySelector('.address-btn');
     const addressDropdown = document.querySelector('.address-dropdown');
+    const addressInput = document.getElementById('homepage-address-input');
+    const btnSearchAddress = document.getElementById('homepage-btn-search');
+    const btnAddAddress = document.getElementById('homepage-btn-add-address');
+    const addressMapPanel = document.getElementById('homepage-address-map-panel');
+    const geoErrorEl = document.getElementById('homepage-geo-error');
+    const homepageMapEl = document.getElementById('homepage-map');
+    const defaultAddresses = ['Aratou 60, Patras', 'Miaouli 13, Patras'];
+    let homepageMap = null;
+    let homepageMarker = null;
+    let selectedAddress = '';
+
+    function readUserSetup() {
+        try {
+            return JSON.parse(localStorage.getItem('unibites-user-setup')) || {};
+        } catch {
+            return {};
+        }
+    }
+
+    function shortenAddress(address) {
+        const normalized = String(address || '').replace(/\s+/g, ' ').trim();
+        if (!normalized.includes(',')) return normalized;
+        const parts = normalized
+            .split(',')
+            .map((part) => part.trim())
+            .filter(Boolean);
+        const houseNumberPattern = /^\d+[a-zA-Zα-ωΑ-Ω]?$/;
+        const postcode = parts.find((part) => /\b\d{3}\s?\d{2}\b/.test(part));
+
+        if (parts.length >= 3 && houseNumberPattern.test(parts[1])) {
+            const neighborhood = postcode
+                ? `${parts[2]} ${postcode.replace(/\s+/g, '')}`
+                : parts[2];
+            return `${parts[0]}, ${parts[1]}, ${neighborhood}`;
+        }
+
+        return parts.slice(0, 2).join(', ');
+    }
+
+    function getInitialAddresses() {
+        const setup = readUserSetup();
+        const storedAddresses = Array.isArray(setup.addresses) ? setup.addresses : [];
+        const source = storedAddresses.length ? storedAddresses : defaultAddresses;
+        return [...new Set(source.map(shortenAddress).filter(Boolean))];
+    }
+
+    const addresses = getInitialAddresses();
+
+    function saveAddresses() {
+        const setup = readUserSetup();
+        setup.addresses = addresses;
+        localStorage.setItem('unibites-user-setup', JSON.stringify(setup));
+    }
+
+    function setSelectedAddress(address) {
+        selectedAddress = address || addresses[0] || '';
+        if (addressBtn) {
+            addressBtn.textContent = selectedAddress ? `${selectedAddress} ▼` : 'Select address ▼';
+        }
+    }
+
+    function renderAddressDropdown() {
+        if (!addressDropdown) return;
+
+        addressDropdown.innerHTML = '';
+        addresses.forEach((address) => {
+            const item = document.createElement('li');
+            item.textContent = address;
+            item.title = address;
+            addressDropdown.appendChild(item);
+        });
+
+        const addItem = document.createElement('li');
+        addItem.className = 'add-new';
+        addItem.textContent = '+ Add New Address';
+        addressDropdown.appendChild(addItem);
+    }
+
+    function openAddressMapPanel() {
+        if (!addressMapPanel) return;
+
+        addressMapPanel.hidden = false;
+        clearGeoError();
+        addressInput?.focus();
+        initHomepageMap();
+        setTimeout(() => homepageMap?.invalidateSize(), 60);
+    }
+
+    function closeAddressMapPanel() {
+        if (!addressMapPanel) return;
+
+        addressMapPanel.hidden = true;
+    }
+
+    function showGeoError(key) {
+        if (!geoErrorEl) return;
+        const dict = dictionary[currentLang] || dictionary.en;
+        geoErrorEl.textContent = dict[key] || dictionary.en[key] || key;
+        geoErrorEl.hidden = false;
+    }
+
+    function clearGeoError() {
+        if (!geoErrorEl) return;
+        geoErrorEl.hidden = true;
+        geoErrorEl.textContent = '';
+    }
+
+    function placeHomepageMarker(lat, lng) {
+        if (!homepageMap || !window.L) return;
+
+        if (homepageMarker) {
+            homepageMarker.setLatLng([lat, lng]);
+        } else {
+            homepageMarker = L.marker([lat, lng]).addTo(homepageMap);
+        }
+
+        homepageMap.setView([lat, lng], 16);
+    }
+
+    function initHomepageMap() {
+        if (homepageMap || !homepageMapEl) return;
+
+        if (!window.L) {
+            showGeoError('geoMapUnavailable');
+            return;
+        }
+
+        homepageMap = L.map('homepage-map').setView([38.2466, 21.7346], 14);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            subdomains: 'abcd',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        }).addTo(homepageMap);
+
+        homepageMap.on('click', async (event) => {
+            clearGeoError();
+            const { lat, lng } = event.latlng;
+            placeHomepageMarker(lat, lng);
+
+            try {
+                addressInput.value = await reverseGeocode(lat, lng);
+            } catch {
+                addressInput.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            }
+        });
+
+        setTimeout(() => homepageMap.invalidateSize(), 60);
+    }
+
+    async function geocodeAddress(query) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+        const res = await fetch(url, { headers: { 'Accept-Language': currentLang === 'gr' ? 'el' : 'en' } });
+        if (!res.ok) throw new Error('network');
+        const data = await res.json();
+        if (!data.length) throw new Error('not_found');
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), display: shortenAddress(data[0].display_name) };
+    }
+
+    async function reverseGeocode(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+        const res = await fetch(url, { headers: { 'Accept-Language': currentLang === 'gr' ? 'el' : 'en' } });
+        if (!res.ok) throw new Error('network');
+        const data = await res.json();
+        return shortenAddress(data.display_name) || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
 
     if (addressBtn && addressDropdown) {
+        renderAddressDropdown();
+        setSelectedAddress(addresses[0]);
+
         addressBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            addressDropdown.classList.toggle('show');
+            const isOpen = addressDropdown.classList.toggle('show');
+            addressBtn.setAttribute('aria-expanded', String(isOpen));
         });
 
         addressDropdown.addEventListener('click', (e) => {
@@ -97,24 +272,57 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!li) return;
 
             if (li.classList.contains('add-new')) {
-                const newAddress = prompt('Enter new address:');
-                if (newAddress) {
-                    const newLi = document.createElement('li');
-                    newLi.textContent = newAddress;
-                    addressDropdown.insertBefore(newLi, li);
-                    addressBtn.textContent = newAddress + " ▼";
-                }
+                openAddressMapPanel();
             } else {
-                addressBtn.textContent = li.textContent + " ▼";
+                setSelectedAddress(li.textContent.trim());
+                closeAddressMapPanel();
             }
 
             addressDropdown.classList.remove('show');
+            addressBtn.setAttribute('aria-expanded', 'false');
         });
 
         document.addEventListener('click', () => {
             addressDropdown.classList.remove('show');
+            addressBtn.setAttribute('aria-expanded', 'false');
         });
     }
+
+    btnSearchAddress?.addEventListener('click', async () => {
+        clearGeoError();
+        const query = addressInput.value.trim();
+        if (!query) return;
+
+        btnSearchAddress.disabled = true;
+        try {
+            const { lat, lng, display } = await geocodeAddress(query);
+            placeHomepageMarker(lat, lng);
+            addressInput.value = display;
+        } catch (err) {
+            showGeoError(err.message === 'not_found' ? 'geoNotFound' : 'geoError');
+        } finally {
+            btnSearchAddress.disabled = false;
+        }
+    });
+
+    addressInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            btnSearchAddress?.click();
+        }
+    });
+
+    btnAddAddress?.addEventListener('click', () => {
+        clearGeoError();
+        const val = shortenAddress(addressInput.value);
+        if (!val || addresses.includes(val)) return;
+
+        addresses.push(val);
+        saveAddresses();
+        renderAddressDropdown();
+        setSelectedAddress(val);
+        closeAddressMapPanel();
+    });
 
     /* ------------------------------
        ALLERGY FILTER

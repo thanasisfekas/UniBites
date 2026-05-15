@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UniBites | Home</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="homepage.css">
 </head>
 
@@ -62,7 +63,7 @@
 
     <!-- ADDRESS BOX  -->
     <section class="address-box">
-        <div class="address-box">
+        <div class="address-panel">
             <button class="address-btn" aria-label="Select address" aria-expanded="false">
                 Aratou 60, Patras ▼
             </button>
@@ -71,6 +72,24 @@
                 <li>Miaouli 13, Patras</li>
                 <li class="add-new">+ Add New Address</li>
             </ul>
+
+            <div class="homepage-address-map-panel" id="homepage-address-map-panel" hidden>
+                <div class="homepage-address-search-row">
+                    <input
+                        type="text"
+                        id="homepage-address-input"
+                        class="homepage-address-input"
+                        placeholder="e.g. Aratou 60, Patras"
+                        autocomplete="off"
+                    />
+                    <button class="homepage-search-btn" id="homepage-btn-search" type="button">Search</button>
+                </div>
+                <p class="homepage-geo-error" id="homepage-geo-error" hidden></p>
+
+                <div id="homepage-map"></div>
+
+                <button class="homepage-add-address-btn" id="homepage-btn-add-address" type="button">+ Add this address</button>
+            </div>
         </div>
     </section>
 
@@ -810,6 +829,7 @@
         </main>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="homepage.js"></script>
 </body>
 </html>
