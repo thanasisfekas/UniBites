@@ -249,7 +249,7 @@ body.theme-dark .utility-menu {
 
 .section-title-collapsible {
     display: block;
-    background-color: var(--text-dark);
+    background-color: var(--menu-bg-dark);
     color: var(--bg-light);
     padding: 12px 16px;
     border-radius: 5px;

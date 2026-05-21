@@ -345,6 +345,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    /* ------------------------------
+       DISABLE SCROLL WHEN MODALS APPEAR
+    ------------------------------ */
+    function disablePageScroll() {
+        document.body.style.overflow = "hidden";
+    }
+
+    function enablePageScroll() {
+        document.body.style.overflow = "";
+    }
+
 /*----------------------------------------------------------------------------------------------------*/
     /* -----------------------------
         VIEW DETAILS MODAL
@@ -417,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         /* show modal */
+        disablePageScroll();
         viewModal.classList.remove("hidden");
 
         /* reset scroll to top */
@@ -427,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* close modal */
     function closeViewModal() {
         viewModal.classList.add("hidden");
+        enablePageScroll();
     }
 
     /* open events */
@@ -471,20 +484,98 @@ document.addEventListener('DOMContentLoaded', () => {
     const editDescription = document.getElementById("editDescription");
     const editPortions = document.getElementById("editTotalPortions");
     const editAddress = document.getElementById("editAddress");
-    const editPickupTimes = document.getElementById("editPickupTimes");
+    const pickupDate = document.getElementById("pickupDate");
+    const pickupStart = document.getElementById("pickupStart");
+    const pickupEnd = document.getElementById("pickupEnd");
+    const addPickupWindowBtn = document.getElementById("addPickupWindow");
+    const pickupWindowList = document.getElementById("pickupWindowList");
     const tagButtons = document.querySelectorAll(".chip-option");
     const allergenDropdown = document.querySelector(".allergen-dropdown");
     const allergyCheckboxes = document.querySelectorAll('.allergen-list input[type="checkbox"]');
+    let pickupWindows = [];
+
+    const now = new Date();
+    const max = new Date();
+    max.setHours(now.getHours() + 48);
+
+    pickupDate.min = now.toISOString().split("T")[0];
+    pickupDate.max = max.toISOString().split("T")[0];
+
+    function formatTimeInput(input) {
+        input.dataset.raw = "";
+        input.addEventListener("keydown", (e) => {
+            const allowedKeys = ["Backspace","Delete","Tab","ArrowLeft","ArrowRight"];
+            // allow control keys
+            if (allowedKeys.includes(e.key)) {
+                if (e.key === "Backspace") {
+                    e.preventDefault();
+                    let raw = input.dataset.raw || "";
+                    raw = raw.slice(0, -1);   // remove last digit
+                    input.dataset.raw = raw;
+                    updateDisplay(input, raw);
+                }
+                return;
+            }
+            // allow only digits
+            if (!/^\d$/.test(e.key)) {
+                e.preventDefault();
+                return;
+            }
+            e.preventDefault();
+            let raw = input.dataset.raw || "";
+            if (raw.length >= 4) return;
+            raw += e.key;
+            input.dataset.raw = raw;
+            updateDisplay(input, raw);
+        });
+    }
+
+    function updateDisplay(input, raw) {
+        if (raw.length === 0) {
+            input.value = "";
+            return;
+        }
+        if (raw.length <= 2) {
+            input.value = raw;
+            return;
+        }
+        // 3 digits: preview with leading zero
+        if (raw.length === 3) {
+            const padded = raw.padStart(4, "0");
+            input.value =
+                padded.slice(0, 2) + ":" + padded.slice(2);
+            return;
+        }
+        // 4 digits: validate
+        const formatted = raw.slice(0, 2) + ":" + raw.slice(2);
+        const [hours, minutes] = formatted.split(":").map(Number);
+        if (hours > 23 || minutes > 59) {
+            input.dataset.raw = raw.slice(0, -1);
+            updateDisplay(input, input.dataset.raw);
+            return;
+        }
+        input.value = formatted;
+    }
+
+    formatTimeInput(pickupStart);
+    formatTimeInput(pickupEnd);
 
     /* open modal */
     function openEditModal(card) {
         editModal.classList.remove("hidden");
+        disablePageScroll();
         // reset fields
         editTitle.value = "";
         editDescription.value = "";
         editPortions.value = "";
         editAddress.value = "";
-        editPickupTimes.value = "";
+        pickupWindows = [];
+        renderPickupWindows();
+        pickupDate.value = "";
+        pickupStart.value = "";
+        pickupEnd.value = "";
+        pickupStart.dataset.raw = "";
+        pickupEnd.dataset.raw = "";
         imagePreview.innerHTML = "No Image Set";
         imageInput.value = "";
         /* reset all checkboxes (tags) */
@@ -497,6 +588,33 @@ document.addEventListener('DOMContentLoaded', () => {
         editModal.querySelector(".edit-modal-content").scrollTop = 0;
     }
 
+    function renderPickupWindows() {
+        pickupWindowList.innerHTML = "";
+
+        pickupWindows.forEach((w, index) => {
+            pickupWindowList.innerHTML += `
+                <div class="pickup-chip">
+                    ${w.date} | ${w.start} - ${w.end}
+                    <button
+                        type="button"
+                        class="remove-window"
+                        data-index="${index}">
+                        ✕
+                    </button>
+                </div>
+            `;
+        });
+
+        document.querySelectorAll(".remove-window")
+            .forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const i = btn.dataset.index;
+                    pickupWindows.splice(i, 1);
+                    renderPickupWindows();
+                });
+            });
+    }
+
     /* allergens dropdown behavior */
     document.addEventListener("click", (e) => {
         if (allergenDropdown && allergenDropdown.open && !allergenDropdown.contains(e.target)) {
@@ -507,6 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* close modal */
     function closeEditModal() {
         editModal.classList.add("hidden");
+        enablePageScroll();
     }
 
     /* edit button */
@@ -527,6 +646,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    addPickupWindowBtn.addEventListener("click", () => {
+        const date = pickupDate.value;
+        const start = pickupStart.value;
+        const end = pickupEnd.value;
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+        if (!date || !start || !end) {
+            alert("Fill all pickup fields.");
+            return;
+        }
+        if (!timeRegex.test(start) || !timeRegex.test(end)) {
+            alert("Use HH:MM format (example: 15:30)");
+            return;
+        }
+        if (start >= end) {
+            alert("End time must be after start.");
+            return;
+        }
+
+        const selected = new Date(`${date}T${start}`);
+        const limit = new Date();
+        limit.setHours(limit.getHours() + 48);
+
+        if (selected > limit) {
+            alert("Pickup must be within 48 hours.");
+            return;
+        }
+        pickupWindows.push({
+            date,
+            start,
+            end
+        });
+        renderPickupWindows();
+        pickupDate.value = "";
+        pickupStart.value = "";
+        pickupEnd.value = "";
+        pickupStart.dataset.raw = "";
+        pickupEnd.dataset.raw = "";
+    });
+
     /* save changes */
     document.querySelector(".save-edit")
         .addEventListener("click", () => {
@@ -536,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 description: editDescription.value,
                 portions: editPortions.value,
                 address: editAddress.value,
-                pickupTimes: editPickupTimes.value,
+                pickupWindows: pickupWindows,
                 tags: Array.from(tagButtons).filter(btn => btn.classList.contains("selected")).map(btn => btn.dataset.tag),
                 allergens: Array.from(allergyCheckboxes).filter(cb => cb.checked).map(cb => cb.value)
             });

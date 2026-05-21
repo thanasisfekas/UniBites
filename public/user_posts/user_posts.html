@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UniBites | Your Meal Posts</title>
+    <title>UniBite | Posts</title>
     <link rel="stylesheet" href="user_posts.css">
 </head>
 
@@ -12,7 +12,7 @@
     <!-- TOP NAV -->
     <header class="topbar">
         <div class="topbar-left">
-            <a class="logo" href="/">UniBites</a>
+            <a class="logo" href="/">UniBite</a>
         </div>
     </header>
 
@@ -44,9 +44,10 @@
                 <a href="#" class="menu-link">Edit Account</a>
             </section>
             <nav class="account-menu">
-                <a href="/orders" class="menu-link">Your Orders</a>
-                <a href="/meal-posts" class="menu-link active">Your Meal Posts</a>
-                <a href="/pending-requests" class="menu-link">Pending Requests</a>
+                <a href="/deliveries" class="menu-link">Deliveries</a>
+                <a href="/requests" class="menu-link">Requests</a>
+                <a href="/user_orders" class="menu-link">Your Orders</a>
+                <a href="/user_posts" class="menu-link active">Your Posts</a>
                 <a href="/logout" class="menu-link logout">Log Out</a>
             </nav>
         </aside>
@@ -65,7 +66,12 @@
                 <div class="posts-grid">
 
                     <!-- CARD -->
-                    <article class="post-card yes-requests">
+                    <article class="post-card yes-requests"
+                        data-pickup='[
+                            {"date":"2026-05-20","start":"15:30","end":"17:00"},
+                            {"date":"2026-05-21","start":"12:00","end":"14:00"}
+                        ]'
+                    >
                         <div class="post-status-bar yes-requests"></div>
                         <div class="post-thumb"><!-- <img src="meal.jpg" alt="Meal"> --></div>
                         
@@ -288,10 +294,40 @@
                                     <label for="editAddress">Address</label>
                                     <input type="text" id="editAddress">
                                 </div>
-                                <div class="edit-field">
-                                    <label for="editPickupTimes">Pickup Times</label>
-                                    <input type="text" id="editPickupTimes">
-                                </div>
+                                
+                                <section class="edit-section">
+                                    <div class="pickup-window-builder">
+                                        <!-- date -->
+                                        <div class="edit-field">
+                                            <label for="pickupDate">Pickup Date</label>
+                                            <input
+                                                type="date"
+                                                id="pickupDate"
+                                                min=""
+                                                max=""
+                                            >
+                                        </div>
+                                        <!-- start -->
+                                        <div class="edit-field">
+                                            <label for="pickupStart">Start Time</label>
+                                            <input type="text" id="pickupStart" maxlength="5" placeholder="HH:MM" inputmode="numeric">
+                                        </div>
+                                        <!-- end -->
+                                        <div class="edit-field">
+                                            <label for="pickupEnd">End Time</label>
+                                            <input type="text" id="pickupEnd" maxlength="5" placeholder="HH:MM" inputmode="numeric">
+                                        </div>
+                                        <button
+                                            type="button"
+                                            class="btn primary"
+                                            id="addPickupWindow">
+                                            Add Pickup Window
+                                        </button>
+                                    </div>
+                                    <!-- preview -->
+                                    <div id="pickupWindowList" class="pickup-window-list">
+                                    </div>
+                                </section>
                             </section>
                         </div>
                         <!-- FOOTER -->
