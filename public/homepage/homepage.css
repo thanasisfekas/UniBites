@@ -1203,6 +1203,72 @@ body.theme-dark .homepage-address-input {
     gap: 10px;
 }
 
+/* pickup */
+.pickup-window-builder {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    align-items: end;
+    margin-top: 12px;
+}
+
+#addPickupWindow {
+    height: 28px;
+    white-space: nowrap;
+    align-self: end;
+}
+
+#pickupStart,
+#pickupEnd {
+    letter-spacing: 1px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.pickup-window-list {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pickup-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 16px;
+    border-radius: 999px;
+
+    background: var(--bg-light);
+    border: 1px solid var(--primary);
+
+    color: var(--primary);
+    font-size: var(--font-sm);
+    font-weight: 500;
+}
+
+.remove-window {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: var(--bg-light);
+    color: var(--red-text);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s ease;
+}
+
+.remove-window:hover {
+    background: var(--red-bg-hover);
+    transform: scale(1.08);
+}
+
 .edit-page-nav,
 .edit-actions {
     padding-top: 6px;
@@ -1253,5 +1319,13 @@ body.theme-dark .homepage-address-input {
 
     #homepage-map {
         height: 260px;
+    }
+
+    .pickup-window-builder {
+        grid-template-columns: 1fr;
+    }
+
+    #addPickupWindow {
+        width: 100%;
     }
 }

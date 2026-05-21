@@ -117,6 +117,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    /* ------------------------------
+       DISABLE SCROLL WHEN MODALS APPEAR
+    ------------------------------ */
+    function disablePageScroll() {
+        document.body.style.overflow = "hidden";
+    }
+
+    function enablePageScroll() {
+        document.body.style.overflow = "";
+    }
+
 /*----------------------------------------------------------------------------------------------------*/
     /* -----------------------------
         VIEW DETAILS MODAL
@@ -180,6 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         /* show modal */
         viewModal.classList.remove("hidden");
+        disablePageScroll();
 
         /* reset scroll */
         const content = viewModal.querySelector(".view-modal-content");
@@ -189,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
     /* close modal */
     function closeViewModal() {
         viewModal.classList.add("hidden");
+        enablePageScroll();
     }
 
     /* open buttons */
@@ -227,23 +240,18 @@ document.addEventListener("DOMContentLoaded", () => {
     function openRateModal(orderItem) {
         const title =
             orderItem.querySelector(".order-list-title")?.textContent || "";
-
         rateMealTitle.textContent = title;
-
         selectedRating = 0;
         updateStars();
-
-        document.getElementById("ratingComment").value = "";
-
         rateModal.classList.remove("hidden");
+        disablePageScroll();
     }
-
 
     /* close */
     function closeRateModal() {
         rateModal.classList.add("hidden");
+        enablePageScroll();
     }
-
 
     /* stars */
     function updateStars() {
@@ -267,7 +275,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-
     /* open buttons */
     document.querySelectorAll(".btn.primary").forEach(button => {
         button.addEventListener("click", () => {
@@ -276,7 +283,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-
     /* close */
     closeRateBtn.addEventListener("click", closeRateModal);
     closeRateFooterBtn.addEventListener("click", closeRateModal);
@@ -284,7 +290,6 @@ document.addEventListener("DOMContentLoaded", () => {
     rateModal
         .querySelector(".modal-overlay")
         .addEventListener("click", closeRateModal);
-
 
     /* submit */
     submitRatingBtn.addEventListener("click", () => {

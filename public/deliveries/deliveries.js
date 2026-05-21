@@ -1,5 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    /* ------------------------------
+    DISABLE SCROLL WHEN MODALS APPEAR
+    ------------------------------ */
+    function disablePageScroll() {
+        document.body.style.overflow = "hidden";
+    }
+
+    function enablePageScroll() {
+        document.body.style.overflow = "";
+    }
+
     /* -----------------------------
         CONFIRM MODAL
     ----------------------------- */
@@ -17,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             title.textContent = "Confirm Delivery";
             text.textContent = "Mark this delivery as completed?";
             modal.classList.remove("hidden");
+            disablePageScroll();
         });
     });
 
@@ -26,11 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
             title.textContent = "Fail Delivery";
             text.textContent = "Mark this delivery as failed?";
             modal.classList.remove("hidden");
+            disablePageScroll();
         });
     });
 
     noBtn.addEventListener("click", () => {
         modal.classList.add("hidden");
+        enablePageScroll();
     });
 
     yesBtn.addEventListener("click", () => {
@@ -43,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         modal.classList.add("hidden");
+        enablePageScroll();
     });
     
 });

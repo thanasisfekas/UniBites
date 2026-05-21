@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UniBites | Home</title>
+    <title>UniBite | Home</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="homepage.css">
 </head>
@@ -13,7 +13,7 @@
     <!-- TOP NAV -->
     <header class="topbar">
         <div class="topbar-left">
-            <a class="logo" href="#">UniBites</a>
+            <a class="logo" href="#">UniBite</a>
         </div>
 
         <!-- RIGHT SIDE -->
@@ -32,8 +32,9 @@
                     </section>
                     <section class="menu-section">
                         <a href="/deliveries" class="menu-btn">Deliveries</a>
-                        <a href="/meal-posts" class="menu-btn">Your Meal Posts</a>
-                        <a href="/pending-requests" class="menu-btn">Pending Requests</a>
+                        <a href="/requests" class="menu-btn">Requests</a>
+                        <a href="/user_orders" class="menu-btn">Your Orders</a>
+                        <a href="/user_posts" class="menu-btn">Your Posts</a>
                     </section>
                     <section class="menu-section">
                         <a href="/logout" class="menu-btn logout">Log Out</a>
@@ -804,10 +805,40 @@
                                     <label for="editAddress">Address</label>
                                     <input type="text" id="editAddress">
                                 </div>
-                                <div class="edit-field">
-                                    <label for="editPickupTimes">Pickup Times</label>
-                                    <input type="text" id="editPickupTimes">
-                                </div>
+
+                                <section class="edit-section">
+                                    <div class="pickup-window-builder">
+                                        <!-- date -->
+                                        <div class="edit-field">
+                                            <label for="pickupDate">Pickup Date</label>
+                                            <input
+                                                type="date"
+                                                id="pickupDate"
+                                                min=""
+                                                max=""
+                                            >
+                                        </div>
+                                        <!-- start -->
+                                        <div class="edit-field">
+                                            <label for="pickupStart">Start Time</label>
+                                            <input type="text" id="pickupStart" maxlength="5" placeholder="HH:MM" inputmode="numeric">
+                                        </div>
+                                        <!-- end -->
+                                        <div class="edit-field">
+                                            <label for="pickupEnd">End Time</label>
+                                            <input type="text" id="pickupEnd" maxlength="5" placeholder="HH:MM" inputmode="numeric">
+                                        </div>
+                                        <button
+                                            type="button"
+                                            class="btn primary"
+                                            id="addPickupWindow">
+                                            Add Pickup Window
+                                        </button>
+                                    </div>
+                                    <!-- preview -->
+                                    <div id="pickupWindowList" class="pickup-window-list">
+                                    </div>
+                                </section>
                             </section>
                         </div>
                         <!-- FOOTER -->

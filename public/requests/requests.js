@@ -1,5 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    /* ------------------------------
+       DISABLE SCROLL WHEN MODALS APPEAR
+    ------------------------------ */
+    function disablePageScroll() {
+        document.body.style.overflow = "hidden";
+    }
+
+    function enablePageScroll() {
+        document.body.style.overflow = "";
+    }
+    
     /* ---------------------------------------------------
        VIEW DETAILS MODAL
     --------------------------------------------------- */
@@ -84,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         /* show modal */
         viewModal.classList.remove("hidden");
+        disablePageScroll();
 
         /* reset scroll */
         const content =
@@ -98,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     --------------------------------------------------- */
     function closeViewModal() {
         viewModal.classList.add("hidden");
+        enablePageScroll();
     }
 
 
