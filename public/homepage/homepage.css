@@ -87,7 +87,7 @@ body.theme-dark .topbar {
 }
 
 /* ------------------------------
-   UTILITY BAR 
+   UTILITY BAR
 ------------------------------ */
 .utility-bar {
     display: flex;
@@ -1084,7 +1084,7 @@ body.theme-dark .homepage-address-input {
     font-weight: 500;
 }
 
-/* checklist (allergens) */ 
+/* checklist (allergens) */
 .allergen-dropdown {
     border: 1px solid var(--gray-200);
     border-radius: 12px;
@@ -1204,6 +1204,56 @@ body.theme-dark .homepage-address-input {
 }
 
 /* pickup */
+.pickup-address-search-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.pickup-address-search-row input {
+    flex: 1;
+    min-width: 0;
+}
+
+.pickup-search-btn {
+    padding: 12px 20px;
+    background-color: var(--primary);
+    color: var(--text-light);
+    border: none;
+    border-radius: 12px;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    font-size: var(--font-sm);
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.pickup-search-btn:hover,
+.pickup-search-btn:focus-visible {
+    background-color: #d96605;
+}
+
+.pickup-search-btn:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.pickup-geo-error {
+    margin: 0;
+    color: #cc3300;
+    font-size: 13px;
+}
+
+.pickup-map {
+    width: 100%;
+    height: 280px;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    box-sizing: border-box;
+    z-index: 0;
+}
+
 .pickup-window-builder {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1319,6 +1369,18 @@ body.theme-dark .homepage-address-input {
 
     #homepage-map {
         height: 260px;
+    }
+
+    .pickup-address-search-row {
+        flex-direction: column;
+    }
+
+    .pickup-search-btn {
+        width: 100%;
+    }
+
+    .pickup-map {
+        height: 250px;
     }
 
     .pickup-window-builder {

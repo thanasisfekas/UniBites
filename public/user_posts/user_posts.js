@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const themeInputs = document.querySelectorAll('input[name="theme"]');
     const languageInputs = document.querySelectorAll('input[name="language"]');
     const languageLabel = document.getElementById('language-label');
+    let currentLang = "en";
 
     const dictionary = {
         en: {
@@ -54,6 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setLanguage(lang) {
+        currentLang = dictionary[lang] ? lang : "en";
         const selected = dictionary[lang] || dictionary.en;
 
         if (languageLabel) {
@@ -132,25 +134,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 3 DOT MENU BEHAVIOR
-    document.querySelectorAll(".menu-trigger").forEach(button => {
-        button.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const dropdown = button.nextElementSibling;
-            // close all other dropdowns first
-            document.querySelectorAll(".menu-dropdown").forEach(menu => {
-                if (menu !== dropdown) {
-                    menu.classList.remove("active");
-                }
-            });
-            // toggle current one
-            dropdown.classList.toggle("active");
+    document.addEventListener("click", (e) => {
+        const button = e.target.closest(".menu-trigger");
+        if (!button) return;
+
+        e.stopPropagation();
+        const dropdown = button.nextElementSibling;
+        if (!dropdown) return;
+
+        document.querySelectorAll(".menu-dropdown").forEach(menu => {
+            if (menu !== dropdown) {
+                menu.classList.remove("active");
+                menu.previousElementSibling?.setAttribute("aria-expanded", "false");
+            }
         });
+
+        const isOpen = dropdown.classList.toggle("active");
+        button.setAttribute("aria-expanded", String(isOpen));
     });
 
     // close when clicking outside
     document.addEventListener("click", () => {
         document.querySelectorAll(".menu-dropdown").forEach(menu => {
             menu.classList.remove("active");
+            menu.previousElementSibling?.setAttribute("aria-expanded", "false");
         });
     });
 
@@ -248,6 +255,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const pickupEnd = document.getElementById("pickupEnd");
     const addPickupWindowBtn = document.getElementById("addPickupWindow");
     const pickupWindowList = document.getElementById("pickupWindowList");
+    const pickupAddressSearchBtn = document.getElementById("pickupAddressSearch");
+    const pickupGeoError = document.getElementById("pickupGeoError");
+    const pickupMapEl = document.getElementById("pickupMap");
     /* tags */
     const tagButtons = document.querySelectorAll(".edit-tag");
     /* allergens */
@@ -255,6 +265,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const allergyCheckboxes = document.querySelectorAll(".allergen-list input[type='checkbox']");
 
     let pickupWindows = [];
+    let pickupMap = null;
+    let pickupMarker = null;
     const now = new Date();
     const max = new Date();
     max.setHours(now.getHours() + 48);
@@ -320,6 +332,128 @@ document.addEventListener("DOMContentLoaded", () => {
     formatTimeInput(pickupStart);
     formatTimeInput(pickupEnd);
 
+    function shortenAddress(address) {
+        const normalized = String(address || "").replace(/\s+/g, " ").trim();
+        if (!normalized.includes(",")) return normalized;
+        const parts = normalized
+            .split(",")
+            .map((part) => part.trim())
+            .filter(Boolean);
+        const houseNumberPattern = /^\d+[^\d\s,]?$/;
+        const postcode = parts.find((part) => /\b\d{3}\s?\d{2}\b/.test(part));
+
+        if (parts.length >= 3 && houseNumberPattern.test(parts[1])) {
+            const neighborhood = postcode
+                ? `${parts[2]} ${postcode.replace(/\s+/g, "")}`
+                : parts[2];
+            return `${parts[0]}, ${parts[1]}, ${neighborhood}`;
+        }
+
+        return parts.slice(0, 2).join(", ");
+    }
+
+    async function geocodeAddress(query) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+        const res = await fetch(url, { headers: { "Accept-Language": currentLang === "gr" ? "el" : "en" } });
+        if (!res.ok) throw new Error("network");
+        const data = await res.json();
+        if (!data.length) throw new Error("not_found");
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), display: shortenAddress(data[0].display_name) };
+    }
+
+    async function reverseGeocode(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+        const res = await fetch(url, { headers: { "Accept-Language": currentLang === "gr" ? "el" : "en" } });
+        if (!res.ok) throw new Error("network");
+        const data = await res.json();
+        return shortenAddress(data.display_name) || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+
+    function showPickupGeoError(message) {
+        if (!pickupGeoError) return;
+        pickupGeoError.textContent = message;
+        pickupGeoError.hidden = false;
+    }
+
+    function clearPickupGeoError() {
+        if (!pickupGeoError) return;
+        pickupGeoError.textContent = "";
+        pickupGeoError.hidden = true;
+    }
+
+    function placePickupMarker(lat, lng) {
+        if (!pickupMap || !window.L) return;
+
+        if (pickupMarker) {
+            pickupMarker.setLatLng([lat, lng]);
+        } else {
+            pickupMarker = L.marker([lat, lng]).addTo(pickupMap);
+        }
+
+        pickupMap.setView([lat, lng], 16);
+    }
+
+    function resetPickupMap() {
+        clearPickupGeoError();
+        if (pickupMarker && pickupMap) {
+            pickupMap.removeLayer(pickupMarker);
+            pickupMarker = null;
+        }
+        pickupMap?.setView([38.2466, 21.7346], 14);
+    }
+
+    function initPickupMap() {
+        if (pickupMap || !pickupMapEl) return;
+
+        if (!window.L) {
+            showPickupGeoError("Map could not be loaded. Check your connection and refresh.");
+            return;
+        }
+
+        pickupMap = L.map("pickupMap").setView([38.2466, 21.7346], 14);
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+            maxZoom: 19,
+            subdomains: "abcd",
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        }).addTo(pickupMap);
+
+        pickupMap.on("click", async (event) => {
+            clearPickupGeoError();
+            const { lat, lng } = event.latlng;
+            placePickupMarker(lat, lng);
+
+            try {
+                editAddress.value = await reverseGeocode(lat, lng);
+            } catch {
+                editAddress.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            }
+        });
+    }
+
+    function refreshPickupMap() {
+        initPickupMap();
+        setTimeout(() => pickupMap?.invalidateSize(), 80);
+    }
+
+    async function locatePickupAddress() {
+        clearPickupGeoError();
+        const query = editAddress.value.trim();
+        if (!query) return;
+
+        pickupAddressSearchBtn.disabled = true;
+        try {
+            const { lat, lng, display } = await geocodeAddress(query);
+            placePickupMarker(lat, lng);
+            editAddress.value = display;
+        } catch (err) {
+            showPickupGeoError(err.message === "not_found"
+                ? "Address not found. Try a more specific address."
+                : "Could not look up this address. Please try again.");
+        } finally {
+            pickupAddressSearchBtn.disabled = false;
+        }
+    }
+
     function renderPickupWindows() {
         pickupWindowList.innerHTML = "";
 
@@ -346,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
     }
-    
+
     /* open modal */
     function openEditModal(card) {
         // retrieve data
@@ -360,7 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const tags = card.dataset.tags
             ? card.dataset.tags.split(",").map(t => t.trim())
             : [];
-        const allergens = card.dataset.allergens
+        let allergens = card.dataset.allergens
             ? card.dataset.allergens.split(",").map(a => a.trim())
             : [];
         const allergensBox = card.querySelector(".post-card");
@@ -377,6 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editDescription.value = description;
         editPortions.value = portions;
         editAddress.value = address;
+        resetPickupMap();
         renderPickupWindows();
         pickupDate.value = "";
         pickupStart.value = "";
@@ -513,6 +648,13 @@ document.addEventListener("DOMContentLoaded", () => {
             prevBtn.style.display = "inline-flex";
         }
         editModal.classList.toggle("page-2", page === 2);
+
+        if (page === 2) {
+            refreshPickupMap();
+            if (editAddress.value.trim() && !pickupMarker) {
+                locatePickupAddress();
+            }
+        }
     }
 
     nextBtn.addEventListener("click", () => {
@@ -520,6 +662,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     prevBtn.addEventListener("click", () => {
         showEditPage(1);
+    });
+
+    pickupAddressSearchBtn?.addEventListener("click", locatePickupAddress);
+    editAddress?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && currentEditPage === 2) {
+            e.preventDefault();
+            locatePickupAddress();
+        }
     });
 
     const imageInput = document.getElementById("editImage");
@@ -618,7 +768,7 @@ document.addEventListener("DOMContentLoaded", () => {
         disablePageScroll();
         // always open at top
         viewModal.querySelector(".view-modal-content").scrollTop = 0;
-        
+
     }
 
     /* close */

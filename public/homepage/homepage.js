@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .split(',')
             .map((part) => part.trim())
             .filter(Boolean);
-        const houseNumberPattern = /^\d+[a-zA-Zα-ωΑ-Ω]?$/;
+        const houseNumberPattern = /^\d+[^\d\s,]?$/;
         const postcode = parts.find((part) => /\b\d{3}\s?\d{2}\b/.test(part));
 
         if (parts.length >= 3 && houseNumberPattern.test(parts[1])) {
@@ -489,10 +489,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const pickupEnd = document.getElementById("pickupEnd");
     const addPickupWindowBtn = document.getElementById("addPickupWindow");
     const pickupWindowList = document.getElementById("pickupWindowList");
+    const pickupAddressSearchBtn = document.getElementById("pickupAddressSearch");
+    const pickupGeoError = document.getElementById("pickupGeoError");
+    const pickupMapEl = document.getElementById("pickupMap");
     const tagButtons = document.querySelectorAll(".chip-option");
     const allergenDropdown = document.querySelector(".allergen-dropdown");
     const allergyCheckboxes = document.querySelectorAll('.allergen-list input[type="checkbox"]');
     let pickupWindows = [];
+    let pickupMap = null;
+    let pickupMarker = null;
 
     const now = new Date();
     const max = new Date();
@@ -560,6 +565,91 @@ document.addEventListener('DOMContentLoaded', () => {
     formatTimeInput(pickupStart);
     formatTimeInput(pickupEnd);
 
+    function showPickupGeoError(message) {
+        if (!pickupGeoError) return;
+        pickupGeoError.textContent = message;
+        pickupGeoError.hidden = false;
+    }
+
+    function clearPickupGeoError() {
+        if (!pickupGeoError) return;
+        pickupGeoError.textContent = "";
+        pickupGeoError.hidden = true;
+    }
+
+    function placePickupMarker(lat, lng) {
+        if (!pickupMap || !window.L) return;
+
+        if (pickupMarker) {
+            pickupMarker.setLatLng([lat, lng]);
+        } else {
+            pickupMarker = L.marker([lat, lng]).addTo(pickupMap);
+        }
+
+        pickupMap.setView([lat, lng], 16);
+    }
+
+    function resetPickupMap() {
+        clearPickupGeoError();
+        if (pickupMarker && pickupMap) {
+            pickupMap.removeLayer(pickupMarker);
+            pickupMarker = null;
+        }
+        pickupMap?.setView([38.2466, 21.7346], 14);
+    }
+
+    function initPickupMap() {
+        if (pickupMap || !pickupMapEl) return;
+
+        if (!window.L) {
+            showPickupGeoError("Map could not be loaded. Check your connection and refresh.");
+            return;
+        }
+
+        pickupMap = L.map("pickupMap").setView([38.2466, 21.7346], 14);
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+            maxZoom: 19,
+            subdomains: "abcd",
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        }).addTo(pickupMap);
+
+        pickupMap.on("click", async (event) => {
+            clearPickupGeoError();
+            const { lat, lng } = event.latlng;
+            placePickupMarker(lat, lng);
+
+            try {
+                editAddress.value = await reverseGeocode(lat, lng);
+            } catch {
+                editAddress.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            }
+        });
+    }
+
+    function refreshPickupMap() {
+        initPickupMap();
+        setTimeout(() => pickupMap?.invalidateSize(), 80);
+    }
+
+    async function locatePickupAddress() {
+        clearPickupGeoError();
+        const query = editAddress.value.trim();
+        if (!query) return;
+
+        pickupAddressSearchBtn.disabled = true;
+        try {
+            const { lat, lng, display } = await geocodeAddress(query);
+            placePickupMarker(lat, lng);
+            editAddress.value = display;
+        } catch (err) {
+            showPickupGeoError(err.message === "not_found"
+                ? "Address not found. Try a more specific address."
+                : "Could not look up this address. Please try again.");
+        } finally {
+            pickupAddressSearchBtn.disabled = false;
+        }
+    }
+
     /* open modal */
     function openEditModal(card) {
         editModal.classList.remove("hidden");
@@ -569,6 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editDescription.value = "";
         editPortions.value = "";
         editAddress.value = "";
+        resetPickupMap();
         pickupWindows = [];
         renderPickupWindows();
         pickupDate.value = "";
@@ -621,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allergenDropdown.removeAttribute("open");
         }
     });
-    
+
     /* close modal */
     function closeEditModal() {
         editModal.classList.add("hidden");
@@ -729,6 +820,10 @@ document.addEventListener('DOMContentLoaded', () => {
             editPrevBtn.style.display = "inline-flex";
         }
         editModal.classList.toggle("page-2", page === 2);
+
+        if (page === 2) {
+            refreshPickupMap();
+        }
     }
 
     editNextBtn.addEventListener("click", () => {
@@ -736,6 +831,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     editPrevBtn.addEventListener("click", () => {
         showEditPage(1);
+    });
+
+    pickupAddressSearchBtn?.addEventListener("click", locatePickupAddress);
+    editAddress?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && currentEditPage === 2) {
+            e.preventDefault();
+            locatePickupAddress();
+        }
     });
 
     const imageInput = document.getElementById("editImage");
@@ -779,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menu = document.getElementById("dropdownMenu");
 
     avatar.addEventListener("click", () => {
-        menu.style.display = 
+        menu.style.display =
             menu.style.display === "flex" ? "none" : "flex";
     });
 

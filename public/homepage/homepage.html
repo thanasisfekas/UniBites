@@ -601,7 +601,7 @@
                 </article>
 
             </section>
-            
+
             <!-- PAGINATION -->
             <div class="pagination">
                 <button class="page-btn prev">❮ Previous</button>
@@ -803,7 +803,12 @@
                                 <h3 class="edit-section-title">Pickup Information</h3>
                                 <div class="edit-field">
                                     <label for="editAddress">Address</label>
-                                    <input type="text" id="editAddress">
+                                    <div class="pickup-address-search-row">
+                                        <input type="text" id="editAddress" autocomplete="off">
+                                        <button class="pickup-search-btn" id="pickupAddressSearch" type="button">Search</button>
+                                    </div>
+                                    <p class="pickup-geo-error" id="pickupGeoError" hidden></p>
+                                    <div class="pickup-map" id="pickupMap"></div>
                                 </div>
 
                                 <section class="edit-section">
