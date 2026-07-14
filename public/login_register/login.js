@@ -99,12 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.preventDefault();
 			sibling.classList.add("hidden");
 
-			const email = document.getElementById("email").value;
-			const password = document.getElementById("password").value;
+			const inputEmail = document.getElementById("email");
+			const inputPassword = document.getElementById("password");
 
 			const user = {
-				email : email,
-				password: password
+				email : inputEmail.value,
+				password: inputPassword.value
 			}
 
 			fetch("/api/user/login", {
@@ -116,19 +116,22 @@ document.addEventListener('DOMContentLoaded', () => {
 			})
 			.then(async(response)=>{
 				const data = await response.json();
-				// console.log("data: " , data);
-				// console.log("status : " ,response.status);
-
+				
 				if(response.status === 401){
-					sibling.textContent='Incorrect Credentials';
+					inputEmail.value="";
+					inputPassword.value="";
+					sibling.textContent=data.message;
 					referenceElement.parentNode.insertBefore(sibling, referenceElement.nextSibling);
 					sibling.classList.remove("hidden");
 					return ;
 				}
-				else if(response.status === 200 && data.status === 'admin log-in')
+				else if(response.status === 200 && data.status === 'ADMIN-Successful_Response')
 					window.location.href = "../../private/admin/admin_dashboard.html";
-				else if(response.status === 200 && data.status === 'student log-in')
+				else if(response.status === 200 && data.status === 'STUDENT-Successful_Response')
 					window.location.href = "../../private/homepage/homepage.html";
+				else
+					sibling.textContent=data.message;
+					sibling.classList.remove("hidden");
 			})
 			.catch((err)=>{console.log("Error verifying user" , err);})
 		});

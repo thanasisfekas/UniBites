@@ -126,6 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	/* ── REGISTER FORM SUBMIT → redirect to account setup ── */
 	const registerForm = document.querySelector('.auth-form form');
+	const referenceElement = document.querySelector(".auth-form h2");
+	const sibling = document.querySelector(".auth-form h4");
+
 	if (registerForm) {
 		registerForm.addEventListener('submit', (e) => {
 			e.preventDefault();
@@ -153,14 +156,18 @@ document.addEventListener('DOMContentLoaded', () => {
         	.then(async (response) => {
 				const data = await response.json();
 
-				// console.log("status : " , response.status , "data:" , data);
-
-				if(response.status === 401){
+				if(response.status === 409){
+					alert(data.message);
 					window.location.href = './login.html';
 					return ;
 				}
-				// console.log("User:", data);
-				window.location.href = '../../private/account_setup/setup.html';
+				else if(response.status === 201)
+					window.location.href = '../../private/account_setup/setup.html';
+				else{
+					sibling.textContent=data.message;
+					referenceElement.parentNode.insertBefore(sibling, referenceElement.nextSibling);
+					sibling.classList.remove("hidden");
+				}
 			})
         	.catch((error) => console.log("Error saving user:",error));
 		});

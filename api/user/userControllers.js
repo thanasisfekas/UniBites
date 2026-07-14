@@ -3,16 +3,8 @@ const appRouter = express.Router();
 const pool  = require("../../db.js");
 const argon2 = require("argon2");
 
-/*email uniqueness*/
-async function emailValidation(email) {
-    return (await pool.query("SELECT count(usr_email) from user WHERE usr_email = ?", [email]))[0][0]['count(usr_email)'] > 0 ? false : true;
-}
-
 async function hashPassword(password){
-    try{
-        return await argon2.hash(password);
-    }
-    catch(err){console.log(err);}
+    return await argon2.hash(password);
 }
 
 /*verify hashed password in db with non-hashed passw*/
@@ -21,41 +13,63 @@ async function verifyPassword(hashedPassword, password){
         if(await argon2.verify(hashedPassword,password)) return true;
         else return false;
     }
-    catch(err){console.log(err);}
+    catch(err){
+        console.log(err);
+        return false;
+    }
 }
 
 appRouter.post("/register",async (req,res)=>{
     const {username, email,password}= req.body;
 
-    if(!(await emailValidation(email))){
-        res.status(401)
-        // console.log(res.statusCode);
-        return res.json({status: "email_err" , message:"Email is already registered"});
-    }
-    else{
-        await pool.query("INSERT INTO user(usr_username,usr_email,usr_passw) VALUES(?,?,?)",[username,email,await hashPassword(password)]);
-    }
+    try {
+        const emailValidation = (await pool.query("SELECT count(usr_email) from user WHERE usr_email = ?", [email]))[0][0]['count(usr_email)'] > 0 ? false : true;
 
-    res.json({
-        status:"success",
-        message:"User received",
-        received:req.body
-    });
+        if(!emailValidation){
+            return res.status(409).json({status: "Email-Conflict" , message:"Email is already registered.Redirecting to Login."});
+        }
+        const hashedPassw = await hashPassword(password);
+        await pool.query("INSERT INTO user(usr_username,usr_email,usr_passw) VALUES(?,?,?)",[username,email,hashedPassw]);
+        res.status(201).json({status:"User-Successful_Response", message: "User registered."});
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({status:"DB/SERVER-Error", message: "Server is not available."});
+    }
 });
-
-
 
 appRouter.post("/login",async (req,res)=>{
     const {email,password}=req.body;
-    const {usr_passw,usr_role} = (await pool.query("SELECT usr_passw,usr_role FROM user WHERE usr_email=?;",[email]))[0][0];
+    try{
+        const temp= (await pool.query("SELECT usr_id,usr_passw,usr_role FROM user WHERE usr_email=?;",[email]))[0][0];
+        const  {usr_id,usr_passw,usr_role} = temp === undefined ? {} : temp;
 
-    if(await verifyPassword(usr_passw,password)){
-        if(usr_role === 'admin') 
-            res.status(200).json({status:"admin log-in",body: req.body});
-        else if(usr_role === 'student')
-            res.status(200).json({status:"student log-in",body: req.body});
-    }else
-        res.status(401).json({status: "unauthorized" ,body: req.body});
+        if(!usr_id)
+            res.status(401).json({status: "Unauthorized" , message:"Incorect Credentialss.Try Again"});
+        else{
+            if(await verifyPassword(usr_passw,password)){
+                req.session.usr_id = usr_id;
+                req.session.LoggedIn = true;
+
+                req.session.save((err)=>{
+                    if(err){
+                        console.log("error with sessions", err);
+                        return res.status(403).json({status:"Session-Forbidden",message:"Error Saving Session"});
+                    }
+
+                    if(usr_role === 'admin') 
+                        res.status(200).json({status:"ADMIN-Successful_Response",message:"Admin Logged-In."});
+                    else if(usr_role === 'student')
+                        res.status(200).json({status:"STUDENT-Successful_Response",message:"Student Logged-In"});
+                });
+            }
+            else
+                res.status(401).json({status:"Unauthorized" , message:"Incorect Credentialss.Try Again."});
+        }
+    }
+    catch(err){
+        res.status(500).json({status:"DB/SERVER-Error", message: "Server is not available.Try Again."});
+    }       
 });
 
 
