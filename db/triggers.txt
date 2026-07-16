@@ -163,9 +163,26 @@ BEGIN
 END$
 DELIMITER ;
 
-/*insert into admin/student after insert on user table*/
-DELIMITER $$
 
+/* add 48 hours active time to new listings */
+DROP TRIGGER IF EXISTS set_expires_at;
+DELIMITER $
+CREATE TRIGGER set_expires_at
+BEFORE INSERT ON listing
+FOR EACH ROW
+BEGIN
+    IF NEW.expires_at IS NULL THEN
+        SET NEW.expires_at = DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 48 HOUR);
+    END IF;
+END$
+DELIMITER ;
+
+
+/* can be created after initials inserts */
+/*insert into admin/student after insert on user table*/
+/*
+DROP TRIGGER IF EXISTS user_reg;
+DELIMITER $$
 CREATE TRIGGER user_reg
 AFTER INSERT ON USER
 FOR EACH ROW
@@ -178,3 +195,4 @@ BEGIN
 END $$
 
 DELIMITER ;
+*/
