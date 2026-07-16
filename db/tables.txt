@@ -6,12 +6,12 @@ CREATE TABLE IF NOT EXISTS user(
     usr_username VARCHAR(100) NOT NULL, 
     usr_email VARCHAR(100) NOT NULL,
     usr_passw VARCHAR(255) NOT NULL,
-    usr_role ENUM("student","admin") NOT NULL DEFAULT "student";
+    usr_role ENUM('student', 'admin') NOT NULL DEFAULT 'student'
 );
 
 CREATE TABLE IF NOT EXISTS student(
     std_id INT PRIMARY KEY,
-    std_rating DECIMAL(3,2) DEFAULT NULL,
+    std_rating DECIMAL(3,2),
     CHECK (std_rating >= 1 AND std_rating <= 5),
     credits INT NOT NULL DEFAULT 5,
     FOREIGN KEY(std_id) REFERENCES user(usr_id) 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS usr_has_addr(
 
 CREATE TABLE IF NOT EXISTS listing(
     lst_id INT PRIMARY KEY AUTO_INCREMENT,
-    poster int NOT NULL,
+    poster INT NOT NULL,
     title VARCHAR(100) NOT NULL,
     description TEXT,
     image_url VARCHAR(255),
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS listing(
     pickup_latitude DECIMAL(9,6),
     pickup_longitude DECIMAL(9,6),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP DEFAULT DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 48 HOUR),
+    expires_at TIMESTAMP NULL DEFAULT NULL,
     status ENUM('ACTIVE','FULL','EXPIRED') DEFAULT 'ACTIVE',
     lst_rating DECIMAL(3,2),
     CHECK (lst_rating >= 1 AND lst_rating <= 5),
