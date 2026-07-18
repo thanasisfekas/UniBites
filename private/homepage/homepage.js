@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let file = null;
+    const user  = localStorage.getItem('username') || 'User';
+    let meal_location = null;
 
     /* ------------------------------
        THEME + LANGUAGE
@@ -12,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chooseTheme: 'Choose Theme',
             dark: 'Dark',
             light: 'Light',
-            welcome: 'Welcome back, Student',
+            welcome: `Welcome back, ${user}`,
             subtitle: 'Fresh meal offerings near you.',
             geoNotFound: 'Address not found. Try a more specific address.',
             geoError: 'Could not look up this address. Please try again.',
@@ -484,9 +487,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const editDescription = document.getElementById("editDescription");
     const editPortions = document.getElementById("editTotalPortions");
     const editAddress = document.getElementById("editAddress");
-    const pickupDate = document.getElementById("pickupDate");
-    const pickupStart = document.getElementById("pickupStart");
-    const pickupEnd = document.getElementById("pickupEnd");
+
+    const startPickupDate = document.getElementById("startPickupDate");
+    const endPickupDate = document.getElementById("endPickupDate");
+
+    const pickupStartTime = document.getElementById("startPickupTime");
+    const pickupEndTime = document.getElementById("endPickupTime");
+
     const addPickupWindowBtn = document.getElementById("addPickupWindow");
     const pickupWindowList = document.getElementById("pickupWindowList");
     const pickupAddressSearchBtn = document.getElementById("pickupAddressSearch");
@@ -501,10 +508,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const now = new Date();
     const max = new Date();
-    max.setHours(now.getHours() + 48);
+    max.setHours(now.getHours() + 24);
 
-    pickupDate.min = now.toISOString().split("T")[0];
-    pickupDate.max = max.toISOString().split("T")[0];
+    startPickupDate.min = now.toISOString().split("T")[0];
+    startPickupDate.max = max.toISOString().split("T")[0];
+
+    endPickupDate.min = startPickupDate.min;
+    endPickupDate.max = startPickupDate.max;
 
     function formatTimeInput(input) {
         input.dataset.raw = "";
@@ -562,8 +572,8 @@ document.addEventListener('DOMContentLoaded', () => {
         input.value = formatted;
     }
 
-    formatTimeInput(pickupStart);
-    formatTimeInput(pickupEnd);
+    formatTimeInput(pickupStartTime);
+    formatTimeInput(pickupEndTime);
 
     function showPickupGeoError(message) {
         if (!pickupGeoError) return;
@@ -618,6 +628,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const { lat, lng } = event.latlng;
             placePickupMarker(lat, lng);
 
+            meal_location = {lat,lng};
+
             try {
                 editAddress.value = await reverseGeocode(lat, lng);
             } catch {
@@ -662,11 +674,12 @@ document.addEventListener('DOMContentLoaded', () => {
         resetPickupMap();
         pickupWindows = [];
         renderPickupWindows();
-        pickupDate.value = "";
-        pickupStart.value = "";
-        pickupEnd.value = "";
-        pickupStart.dataset.raw = "";
-        pickupEnd.dataset.raw = "";
+        startPickupDate.value = "";
+        endPickupDate.value = "";
+        pickupStartTime.value = "";
+        pickupEndTime.value = "";
+        pickupStartTime.dataset.raw = "";
+        pickupEndTime.dataset.raw = "";
         imagePreview.innerHTML = "No Image Set";
         imageInput.value = "";
         /* reset all checkboxes (tags) */
@@ -685,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pickupWindows.forEach((w, index) => {
             pickupWindowList.innerHTML += `
                 <div class="pickup-chip">
-                    ${w.date} | ${w.start} - ${w.end}
+                    ${w.startDate} : ${w.startTime} - ${w.endDate} : ${w.endTime}
                     <button
                         type="button"
                         class="remove-window"
@@ -705,6 +718,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
     }
+
+    /* Additional check for integer input. */
+    editPortions.addEventListener('keydown' , (e)=>{
+        console.log(editPortions.value);
+        if(e.key ==='Backspace' || e.key ==='Delete' || e.key ==='ArrowLeft' || e.key ==='ArrowRight' )
+            return;
+        else if(!e.key.match(/^[1-9]\d*$/))
+            e.preventDefault();
+    });
 
     /* allergens dropdown behavior */
     document.addEventListener("click", (e) => {
@@ -732,70 +754,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* tag selection */
     tagButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("change", () => {
             btn.classList.toggle("selected");
         });
     });
 
+    /* issue with dates needs fixing . */ 
     addPickupWindowBtn.addEventListener("click", () => {
-        const date = pickupDate.value;
-        const start = pickupStart.value;
-        const end = pickupEnd.value;
+        const startDate = startPickupDate.value; 
+        const endDate = endPickupDate.value;
+        const start = new Date(`${startDate}T${pickupStartTime.value}`); 
+        const end = new Date(`${endDate}T${pickupEndTime.value}`); 
         const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-        if (!date || !start || !end) {
+        const startTime =pickupStartTime.value;
+        const endTime = pickupEndTime.value;
+
+        if (!startDate || !start || !end) {
             alert("Fill all pickup fields.");
             return;
         }
-        if (!timeRegex.test(start) || !timeRegex.test(end)) {
+
+        if (!timeRegex.test(pickupStartTime.value) || !timeRegex.test(pickupEndTime.value)) {
             alert("Use HH:MM format (example: 15:30)");
             return;
         }
-        if (start >= end) {
+
+        const limit = new Date();
+        limit.setHours(limit.getHours() + 24);
+
+        if (start > limit) {
             alert("End time must be after start.");
             return;
         }
 
-        const selected = new Date(`${date}T${start}`);
-        const limit = new Date();
-        limit.setHours(limit.getHours() + 48);
-
-        if (selected > limit) {
-            alert("Pickup must be within 48 hours.");
+        if ((end-start) > 24 * 60 * 60 * 1000) {
+            alert("Pickup must be within 24 hours.");
             return;
         }
+
         pickupWindows.push({
-            date,
-            start,
-            end
+            startDate,
+            startTime,
+            endDate,
+            endTime
         });
+
         renderPickupWindows();
-        pickupDate.value = "";
-        pickupStart.value = "";
-        pickupEnd.value = "";
-        pickupStart.dataset.raw = "";
-        pickupEnd.dataset.raw = "";
+        startPickupDate.value = "";
+        endPickupDate.value = "";
+        pickupStartTime.value = "";
+        pickupEndTime.value = "";
+        pickupStartTime.dataset.raw = "";
+        pickupEndTime.dataset.raw = "";
     });
 
     /* save changes */
-    document.querySelector(".save-edit")
-        .addEventListener("click", () => {
 
-            console.log({
+    document.querySelector(".save-edit")
+        .addEventListener("click", async () => {
+            const mealPost = new FormData();
+
+            /* RAW TEXT */
+            mealPost.append('mealInfo'  , JSON.stringify({
                 title: editTitle.value,
                 description: editDescription.value,
                 portions: editPortions.value,
-                address: editAddress.value,
+                address: {
+                    address : editAddress.value,
+                    latlong : meal_location
+                },
                 pickupWindows: pickupWindows,
-                tags: Array.from(tagButtons).filter(btn => btn.classList.contains("selected")).map(btn => btn.dataset.tag),
+                tags: Array.from(tagButtons).filter(btn => btn.classList.contains("selected")).map(btn => btn.firstElementChild.value),
                 allergens: Array.from(allergyCheckboxes).filter(cb => cb.checked).map(cb => cb.value)
-            });
+            }));    
+            
+            /* send data to backend */
+            
+            if(!file)
+                console.log("No image Found");
+            else
+                mealPost.append('image' , file);
 
-            /*
-            send data to backend
-            */
-
+            const res = await fetch('/api/user/createMeal' ,{
+                method : "POST",
+                body: mealPost
+            })
+            .then(async (res)=>{
+                console.log("first then");
+                const data = await res.json();
+                console.log("image : ", data);
+            })
+            .catch((err)=>{console.log(err)});
             closeEditModal();
+
+            file = null;
+            tagButtons.forEach(btn => btn.classList.remove('selected'));
         });
 
     let currentEditPage = 1;
@@ -845,7 +899,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const imagePreview = document.getElementById("editImagePreview");
 
     imageInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
+        file = e.target.files[0];
+        console.log(file)
         if (!file) {
             imagePreview.innerHTML = "No Image Set";
             return;
