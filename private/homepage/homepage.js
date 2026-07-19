@@ -813,6 +813,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector(".save-edit")
         .addEventListener("click", async () => {
+            if(!editTitle.value){
+                alert("Enter a title.");
+                return ;
+            }
+            if(!editPortions.value){
+                alert("Enter portions.");
+                return ;
+            }
+            if(!meal_location || !editAddress.value){
+                alert("Enter a pickup location");
+                return ; 
+            }
+            if(pickupWindows.length === 0){
+                alert("Enter a pickup Date");
+                return;
+            }
+
             const mealPost = new FormData();
 
             /* RAW TEXT */
@@ -841,11 +858,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: mealPost
             })
             .then(async (res)=>{
-                console.log("first then");
                 const data = await res.json();
-                console.log("image : ", data);
+
+                if(res.status === 500){
+                    alert(data.message);
+                    return;
+                }
+                else if(res.status === 201)
+                    alert(data.status);
+                else{
+                    alert("Unknown Error.Try Again.");
+                    return ; 
+                }
             })
             .catch((err)=>{console.log(err)});
+
             closeEditModal();
 
             file = null;

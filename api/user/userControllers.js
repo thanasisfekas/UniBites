@@ -42,8 +42,8 @@ appRouter.post("/register",async (req,res)=>{
             return res.status(409).json({status: "Email-Conflict" , message:"Email is already registered.Redirecting to Login."});
         }
         const hashedPassw = await hashPassword(password);
-        await pool.query("INSERT INTO user(usr_username,usr_email,usr_passw) VALUES(?,?,?)",[username,email,hashedPassw]);
-        const usr_id = (await pool.query("SELECT LAST_INSERT_ID()"))[0][0]['LAST_INSERT_ID()'];
+        const [rows] = await pool.query("INSERT INTO user(usr_username,usr_email,usr_passw) VALUES(?,?,?)",[username,email,hashedPassw]);
+        const usr_id = rows.insertId;
     
         req.session.usr_id = usr_id;
         req.session.username = username;
@@ -100,46 +100,60 @@ appRouter.post("/login",async (req,res)=>{
 
 appRouter.post('/createMeal',upload.single('image') ,async (req,res)=>{
     const {title,description,portions,address,pickupWindows,tags,allergens} = JSON.parse(req.body.mealInfo);
-
-    await pool.query("INSERT INTO listing(poster,title,description,portions,pickup_location,pickup_latitude,pickup_longitude) VALUES(?,?,?,?,?,?,?)",[req.session.usr_id,title,description,portions,address.address,address.latlong.lat , address.latlong.lng]);
-    /* fileId = listing id + image original name*/ 
-    const lst_id = (await pool.query("SELECT LAST_INSERT_ID()"))[0][0]['LAST_INSERT_ID()'];
-
-    const pickup_windows_data = pickupWindows.map(window=>{
-        return [lst_id,`${window.startDate} ${window.startTime}:00`, `${window.endDate} ${window.endTime}:00`];
-    })
-    pool.query("INSERT INTO pickup_window(lst_id,pickup_start,pickup_end) VALUES ?", [pickup_windows_data])
-
-    let [allerg_data,tag_data] = await Promise.all([
-        pool.query("SELECT allerg_id FROM allergens WHERE  allerg_type IN (?)",[allergens]),
-        pool.query("SELECT mtag_id FROM meal_tag WHERE mtag_type IN (?)",[tags])
-    ]);
-
-     allerg_data  = allerg_data[0].map(allergy=>{
-        return [allergy.allerg_id, lst_id];
-    });
-
-    await pool.query("INSERT INTO lst_has_allergens(allerg_id,lst_id) VALUES ?" , [allerg_data]);
-
-    /*INSERT MEAL TAGS FOR THE LISTING*/ 
-    tag_data = tag_data[0].map(tag=>{
-        return [tag.mtag_id , lst_id];
-    });
+    let lst_id;
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
     
-    await pool.query("INSERT INTO lst_has_meal_tag(mtag_id,lst_id) VALUES ?",[tag_data]);
+    try{    
+        const [rows] = await connection.query("INSERT INTO listing(poster,title,description,portions,pickup_location,pickup_latitude,pickup_longitude) VALUES(?,?,?,?,?,?,?)",[req.session.usr_id,title,description,portions,address.address,address.latlong.lat , address.latlong.lng]);
+        lst_id = rows.insertId;
 
-    if(req.file){
-        const file_id = `${lst_id}_${req.file.originalname}`;
-        const image = InputFile.fromBuffer(req.file.buffer , req.file.originalname);
-        const response = await cloudstorage.createFile({
-        bucketId: process.env.BUCKET_ID,
-        fileId: file_id,
-        file: image
-    });
+        const pickup_windows_data = pickupWindows.map(window=>{
+            return [lst_id,`${window.startDate} ${window.startTime}:00`, `${window.endDate} ${window.endTime}:00`];
+        });
+        await connection.query("INSERT INTO pickup_window(lst_id,pickup_start,pickup_end) VALUES ?", [pickup_windows_data]);
+
+        if(allergens.length){
+            let allerg_data = await connection.query("SELECT allerg_id FROM allergens WHERE  allerg_type IN (?)",[allergens]);
+            allerg_data  = allerg_data[0].map(allergy=>{
+                return [allergy.allerg_id, lst_id];
+            });
+            await connection.query("INSERT INTO lst_has_allergens(allerg_id,lst_id) VALUES ?" , [allerg_data]);
+        }
+        if(tags.length){
+            let tag_data = await connection.query("SELECT mtag_id FROM meal_tag WHERE mtag_type IN (?)",[tags]);
+            /*INSERT MEAL TAGS FOR THE LISTING*/ 
+            tag_data = tag_data[0].map(tag=>{
+                return [tag.mtag_id , lst_id];
+            });
+            await connection.query("INSERT INTO lst_has_meal_tag(mtag_id,lst_id) VALUES ?",[tag_data]);
+        }
+        await connection.commit();
     }
+    catch(err){
+        await connection.rollback();
+        console.log("Err from db/server: ", err);
+        return res.status(500).json({status:'DB/SERVER-ERROR', message:'Cant create Meal right now.'});
+    }
+    finally{connection.release();}
     
-    // console.log("cloud response : ", response);
-    return res.status(201).json({status:"Image saved to cloud"});
+    try{
+       if(req.file){
+            /* fileId = listing id + image original name*/ 
+            const file_id = `${lst_id}_${req.file.originalname}`;
+            const image = InputFile.fromBuffer(req.file.buffer , req.file.originalname);
+            const response = await cloudstorage.createFile({
+                bucketId: process.env.BUCKET_ID,
+                fileId: file_id,
+                file: image
+            });
+        }
+    }
+    catch(err){
+        console.log("Err from cloud-storage : " , err);
+        return res.status(500).json({status:'CLOUD-STORAGE_ERR', message:'Image didnt saved to Storage.'});
+    }
+    return res.status(201).json({status:"Meal Created."});
 });
 
 module.exports = appRouter;
