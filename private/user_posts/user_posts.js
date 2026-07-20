@@ -185,24 +185,77 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = "";
     }
 
+    function renderMealImg(img, displayWidth, step,idx) {
+            const canvas = document.querySelector(`#post-canvas_${idx}`) ;
+            const ctx = canvas.getContext("2d");
+            const dpr = window.devicePixelRatio || 1;
+
+
+            const targetWidth = displayWidth * dpr;
+            const targetHeight = (displayWidth * (img.height / img.width)) * dpr;
+
+            canvas.width = targetWidth;
+            const offX = (canvas.width-targetWidth) / 2;
+            canvas.height = targetHeight;
+            const offY = (canvas.height-targetHeight) / 2;
+            canvas.style.width = displayWidth + "px";
+            canvas.style.height = (displayWidth * (img.height / img.width)) + "px";
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+
+            if (img.width * step > targetWidth) {
+                let curWidth = Math.floor(img.width * step);
+                let curHeight = Math.floor(img.height * step);
+
+                let oc = document.createElement('canvas');
+                let octx = oc.getContext('2d');
+                oc.width = curWidth;
+                oc.height = curHeight;
+
+                octx.imageSmoothingEnabled = true;
+                octx.imageSmoothingQuality = "high";
+                octx.drawImage(img, 0, 0, curWidth, curHeight);
+
+                while (curWidth * step > targetWidth) {
+                    const nextWidth = Math.floor(curWidth * step);
+                    const nextHeight = Math.floor(curHeight * step);
+
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = nextWidth;
+                    tempCanvas.height = nextHeight;
+
+                    tempCtx.imageSmoothingEnabled = true;
+                    tempCtx.imageSmoothingQuality = "high";
+                    tempCtx.drawImage(oc, 0, 0, curWidth, curHeight, 0, 0, nextWidth, nextHeight);
+
+                    oc = tempCanvas;
+                    curWidth = nextWidth;
+                    curHeight = nextHeight;
+                }
+                ctx.drawImage(oc, 0, 0, curWidth, curHeight, offX, offY, targetWidth, targetHeight);
+            } else {
+                ctx.drawImage(img, 0, 0,img.width,img.height,offX,offY, targetWidth, targetHeight);
+            }
+        }
+
     /* GET POSTS FROM DB */ 
     fetch('/api/posts/meals' , {
         method: 'GET'
     })
     .then(async (res)=>{
-        const {status,body} = await res.json();
-        const {meals, requests,imgUrl} = body;
-        
-        // dont forget to update the yes-requests class
+        const data = await res.json();
+        const meals = data.body;
 
-        const orders = requests[0]['count(rq_id)'] || 'No';
-
+        let orders;
         // update portion after each request
-        meals.forEach(meal=>{
+        meals.forEach((meal,idx)=>{
+            orders = meal.requests;
             const postHtml =  `<article class="post-card">
-                        <div class="post-status-bar ${orders === 'No' ? '' : 'yes-requests'}">${orders} new requests!</div>
+                        <div class="post-status-bar ${orders === 0 ? '' : 'yes-requests'}">${orders === 0 ? 'No' : orders} new requests!</div>
                         <div class="post-thumb">
-                            <canvas id="post-canvas"></canvas>
+                            <canvas id="post-canvas_${idx}"></canvas>
                         </div>
 
                         <div class="post-body">
@@ -229,88 +282,34 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="post-tags">
                             </div>
                             <div class="post-meta">
-                                <span class="post-time">Posted on • 03/04 @ 18:30</span>
+                                <span class="post-time">Posted on • ${meal.created_at.slice(5,10).replace('-','/')} @ ${meal.created_at.slice(11,16).replace('-','/')}</span>
                                 <span class="post-time-remaining">24h remaining</span>
                             </div>
                             <div class="post-meta">
-                                <span class="post-address">Aratou 60, Patras</span>
+                                <span class="post-address">${meal.pickup_location}</span>
                             </div>
-                            <div class="post-allergens no-allergens">This meal has no allergens noted.</div>
+                            <div class="post-allergens ${meal.allergens.length ===0 ? 'no-allergens': 'yes-allergens'} ">${meal.allergens.length ===0? "This meal has no allergens noted." :"This meal has allergens."}</div>
                         </div>
                     </article>`
 
             document.querySelector(".posts-grid").innerHTML +=postHtml;
-            // document.querySelector('.post-tags').innerHTML += meal.tag`<span class="tag">Pasta</span>
-            //                     <span class="tag">Vegetarian</span>`; 
+
+
+            meal.tags.forEach(tag=>{
+                document.querySelectorAll(".post-tags")[idx].innerHTML +=`<span class="tag">${tag}</span>`;
+            });
+
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.src = meal.imgUrl;
+            img.onload = ()=>{
+                renderMealImg(img,document.querySelector(".post-thumb").clientWidth , 0.5,idx);
+            };
+
+            window.addEventListener('resize' , ()=>{
+                renderMealImg(img,document.querySelector(".post-thumb").clientWidth , 0.5,idx);
+            });      
         });
-
-        // multi step downscale
-        // const img = new Image();
-        // img.crossOrigin = 'Anonymous';
-        // img.src = result1.href;
-
-        // img.onload = function() {
-        //     multi_step_downscale(img,document.querySelector(".post-thumb").clientWidth , 0.5);
-        // };
-
-        // window.addEventListener('resize' , ()=>{
-        //     multi_step_downscale(img,document.querySelector(".post-thumb").clientWidth , 0.5);
-        // });
-
-        // function multi_step_downscale(img, displayWidth, step) {
-        //     const canvas = document.querySelector("#post-canvas") ;
-        //     const ctx = canvas.getContext("2d");
-        //     const dpr = window.devicePixelRatio || 1;
-
-
-        //     const targetWidth = displayWidth * dpr;
-        //     const targetHeight = (displayWidth * (img.height / img.width)) * dpr;
-
-        //     canvas.width = targetWidth;
-        //     const offX = (canvas.width-targetWidth) / 2;
-        //     canvas.height = targetHeight;
-        //     const offY = (canvas.height-targetHeight) / 2;
-        //     canvas.style.width = displayWidth + "px";
-        //     canvas.style.height = (displayWidth * (img.height / img.width)) + "px";
-
-        //     ctx.imageSmoothingEnabled = true;
-        //     ctx.imageSmoothingQuality = "high";
-
-        //     if (img.width * step > targetWidth) {
-        //         let curWidth = Math.floor(img.width * step);
-        //         let curHeight = Math.floor(img.height * step);
-
-        //         let oc = document.createElement('canvas');
-        //         let octx = oc.getContext('2d');
-        //         oc.width = curWidth;
-        //         oc.height = curHeight;
-
-        //         octx.imageSmoothingEnabled = true;
-        //         octx.imageSmoothingQuality = "high";
-        //         octx.drawImage(img, 0, 0, curWidth, curHeight);
-
-        //         while (curWidth * step > targetWidth) {
-        //             const nextWidth = Math.floor(curWidth * step);
-        //             const nextHeight = Math.floor(curHeight * step);
-
-        //             const tempCanvas = document.createElement('canvas');
-        //             const tempCtx = tempCanvas.getContext('2d');
-        //             tempCanvas.width = nextWidth;
-        //             tempCanvas.height = nextHeight;
-
-        //             tempCtx.imageSmoothingEnabled = true;
-        //             tempCtx.imageSmoothingQuality = "high";
-        //             tempCtx.drawImage(oc, 0, 0, curWidth, curHeight, 0, 0, nextWidth, nextHeight);
-
-        //             oc = tempCanvas;
-        //             curWidth = nextWidth;
-        //             curHeight = nextHeight;
-        //         }
-        //         ctx.drawImage(oc, 0, 0, curWidth, curHeight, offX, offY, targetWidth, targetHeight);
-        //     } else {
-        //         ctx.drawImage(img, 0, 0,img.width,img.height,offX,offY, targetWidth, targetHeight);
-        //     }
-        // }
     })
     .catch((err)=>{console.log(err)});
 

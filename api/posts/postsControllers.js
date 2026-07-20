@@ -22,7 +22,7 @@ appRouter.get('/meals' , async (req,res)=>{
     let meals = (await pool.query("SELECT * from listing where poster= ? ",[req.session.usr_id]))[0];
     const lst_id = meals.map(meal=> meal.lst_id);
 
-    const requests = (await pool.query("SELECT count(rq_id) from requests where lst_id in(?)" , [lst_id]))[0].reduce((acc,curr)=>{
+    const requests = (await pool.query("SELECT count(rq_id),lst_id from requests where lst_id in(?) group by lst_id" , [lst_id]))[0].reduce((acc,curr)=>{
         acc[curr.lst_id] = curr['count(rq_id)'];
         return acc;
     },{});
@@ -51,11 +51,18 @@ appRouter.get('/meals' , async (req,res)=>{
     let images =await  cloudstorage.listFiles(process.env.BUCKET_ID);
     const fileIdRegex =new RegExp(`^(${lst_id.join('|')})_.*`);
     images = images.files.filter((img)=> fileIdRegex.test(img.$id));
+    
+    images = images.reduce((acc,curr)=>{
+        const meal = curr.$id.split('_')[0];
+        acc[meal] = `${process.env.API_ENDPOINT}/storage/buckets/${process.env.BUCKET_ID}/files/${curr.$id}/view?project=${process.env.PROJECT_ID}`;
+        return acc;
+    });
+
 
     meals = meals.map(meal=>{
         return {
             ...meal,
-            requests:requests[meal.lst_id] || 0,
+            requests:requests[meal.lst_id] ?? 0,
             tags: tags[meal.lst_id] ?? [],
             pickup_windows: pickup_windows[meal.lst_id]?.map(window =>
                 ({   
@@ -63,18 +70,13 @@ appRouter.get('/meals' , async (req,res)=>{
                     end :window[1]
                 })
             ) ?? [],
-            allergens : allergens[meal.lst_id] ?? []
+            allergens : allergens[meal.lst_id] ?? [],
+            imgUrl : images[meal.lst_id] ?? ''
         }
     });
 
-
     
-
-    
-    // const mealImages = images.filter;
-    // const url =await Promise.all(images.map(async (img)=>({id : img.$id ,name : img.name ,url :await cloudstorage.getFileView(process.env.BUCKET_ID,img.$id)})));
-    // ;
-    res.status(200).json({status:"READY-MEALS",body:final});
+    res.status(200).json({status:"READY-MEALS",body:meals});
 });
 
 
