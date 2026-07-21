@@ -367,6 +367,15 @@ canvas{
 .yes-allergens {
     background: var(--red-bg);
     color: var(--red-text);
+    
+}
+
+.no-tags {
+    background-color: var(--primary);
+    color: var(--bg-light);
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: var(--font-xs);
 }
 
 /* ------------------------------

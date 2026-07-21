@@ -186,59 +186,65 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderMealImg(img, displayWidth, step,idx) {
-            const canvas = document.querySelector(`#post-canvas_${idx}`) ;
-            const ctx = canvas.getContext("2d");
-            const dpr = window.devicePixelRatio || 1;
+        const canvas = document.querySelector(`#post-canvas_${idx}`) ;
+        const ctx = canvas.getContext("2d");
+        const dpr = window.devicePixelRatio || 1;
 
 
-            const targetWidth = displayWidth * dpr;
-            const targetHeight = (displayWidth * (img.height / img.width)) * dpr;
+        const targetWidth = displayWidth * dpr;
+        const targetHeight = (displayWidth * (img.height / img.width)) * dpr;
 
-            canvas.width = targetWidth;
-            const offX = (canvas.width-targetWidth) / 2;
-            canvas.height = targetHeight;
-            const offY = (canvas.height-targetHeight) / 2;
-            canvas.style.width = displayWidth + "px";
-            canvas.style.height = (displayWidth * (img.height / img.width)) + "px";
+        canvas.width = targetWidth;
+        const offX = (canvas.width-targetWidth) / 2;
+        canvas.height = targetHeight;
+        const offY = (canvas.height-targetHeight) / 2;
+        canvas.style.width = displayWidth + "px";
+        canvas.style.height = (displayWidth * (img.height / img.width)) + "px";
 
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = "high";
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
 
-            if (img.width * step > targetWidth) {
-                let curWidth = Math.floor(img.width * step);
-                let curHeight = Math.floor(img.height * step);
+        if (img.width * step > targetWidth) {
+            let curWidth = Math.floor(img.width * step);
+            let curHeight = Math.floor(img.height * step);
 
-                let oc = document.createElement('canvas');
-                let octx = oc.getContext('2d');
-                oc.width = curWidth;
-                oc.height = curHeight;
+            let oc = document.createElement('canvas');
+            let octx = oc.getContext('2d');
+            oc.width = curWidth;
+            oc.height = curHeight;
 
-                octx.imageSmoothingEnabled = true;
-                octx.imageSmoothingQuality = "high";
-                octx.drawImage(img, 0, 0, curWidth, curHeight);
+            octx.imageSmoothingEnabled = true;
+            octx.imageSmoothingQuality = "high";
+            octx.drawImage(img, 0, 0, curWidth, curHeight);
 
-                while (curWidth * step > targetWidth) {
-                    const nextWidth = Math.floor(curWidth * step);
-                    const nextHeight = Math.floor(curHeight * step);
+            while (curWidth * step > targetWidth) {
+                const nextWidth = Math.floor(curWidth * step);
+                const nextHeight = Math.floor(curHeight * step);
 
-                    const tempCanvas = document.createElement('canvas');
-                    const tempCtx = tempCanvas.getContext('2d');
-                    tempCanvas.width = nextWidth;
-                    tempCanvas.height = nextHeight;
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = nextWidth;
+                tempCanvas.height = nextHeight;
 
-                    tempCtx.imageSmoothingEnabled = true;
-                    tempCtx.imageSmoothingQuality = "high";
-                    tempCtx.drawImage(oc, 0, 0, curWidth, curHeight, 0, 0, nextWidth, nextHeight);
+                tempCtx.imageSmoothingEnabled = true;
+                tempCtx.imageSmoothingQuality = "high";
+                tempCtx.drawImage(oc, 0, 0, curWidth, curHeight, 0, 0, nextWidth, nextHeight);
 
-                    oc = tempCanvas;
-                    curWidth = nextWidth;
-                    curHeight = nextHeight;
-                }
-                ctx.drawImage(oc, 0, 0, curWidth, curHeight, offX, offY, targetWidth, targetHeight);
-            } else {
-                ctx.drawImage(img, 0, 0,img.width,img.height,offX,offY, targetWidth, targetHeight);
+                oc = tempCanvas;
+                curWidth = nextWidth;
+                curHeight = nextHeight;
             }
+            ctx.drawImage(oc, 0, 0, curWidth, curHeight, offX, offY, targetWidth, targetHeight);
+        } else {
+            ctx.drawImage(img, 0, 0,img.width,img.height,offX,offY, targetWidth, targetHeight);
         }
+    }
+
+    function closeModal(modal){
+        modal.classList.add("hidden");
+        enablePageScroll();
+    }
+
 
     /* GET POSTS FROM DB */ 
     fetch('/api/posts/meals' , {
@@ -250,9 +256,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let orders;
         // update portion after each request
+
         meals.forEach((meal,idx)=>{
-            orders = meal.requests;
-            const postHtml =  `<article class="post-card">
+            orders = meal.requests.count ?? 0 ;
+            
+            const postHtml =  `<article class="post-card" id="post-card_${idx}">
                         <div class="post-status-bar ${orders === 0 ? '' : 'yes-requests'}">${orders === 0 ? 'No' : orders} new requests!</div>
                         <div class="post-thumb">
                             <canvas id="post-canvas_${idx}"></canvas>
@@ -279,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </div>
                             </div>
                             <p class="post-description">${meal.description}</p>
-                            <div class="post-tags">
+                            <div class="post-tags" id="post-tags_${idx}">
                             </div>
                             <div class="post-meta">
                                 <span class="post-time">Posted on • ${meal.created_at.slice(5,10).replace('-','/')} @ ${meal.created_at.slice(11,16).replace('-','/')}</span>
@@ -290,15 +298,57 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                             <div class="post-allergens ${meal.allergens.length ===0 ? 'no-allergens': 'yes-allergens'} ">${meal.allergens.length ===0? "This meal has no allergens noted." :"This meal has allergens."}</div>
                         </div>
-                    </article>`
+                    </article>
 
-            document.querySelector(".posts-grid").innerHTML +=postHtml;
+                    <div class="requests-modal hidden" id="requestsModal_${idx}">
+                        <div class="modal-overlay"></div>
+                            <div class="requests-modal-content">
+                                <h2>Requests</h2>
+                                <div class="requests-list">
 
+                                </div>
+                                <button class="btn primary close-requests-modal">Close</button>
+                            </div>
+                        </div>
+                    </div>`;
 
-            meal.tags.forEach(tag=>{
-                document.querySelectorAll(".post-tags")[idx].innerHTML +=`<span class="tag">${tag}</span>`;
+            document.querySelector(".posts-grid").insertAdjacentHTML('beforeend',postHtml);
+            const reqModal = document.getElementById(`requestsModal_${idx}`);
+
+            const card = document.getElementById(`post-card_${idx}`);
+            const reqlist = reqModal.querySelector(".requests-list");
+
+            const requests = meal.requests===0 ? [] : meal.requests.info;
+
+            requests.forEach(([username,date])=>{
+                reqlist.insertAdjacentHTML( 'beforeend',`<div class="request-item">
+                                        <div class="request-info">
+                                            <strong>${username}</strong>
+                                            <p class="request-time">${date.replace('T',' ').slice(0,16)}</p>
+                                        </div>
+                                        <div class="request-actions">
+                                            <button class="request-btn accept" title="Accept">✓</button>
+                                            <button class="request-btn decline" title="Decline">✕</button>
+                                        </div>
+                                    </div>`);
             });
 
+            reqModal?.querySelector(".modal-overlay").addEventListener('click',()=> closeModal(reqModal));
+
+            reqModal?.querySelector(".close-requests-modal").addEventListener('click',()=> closeModal(reqModal));
+
+            card.querySelector('.post-status-bar').textContent.trim() === 'No new requests!'? [] :card.querySelector('.post-status-bar').addEventListener('click',(e)=>{
+                e.stopPropagation();
+                reqModal.classList.remove("hidden");
+                disablePageScroll();
+            });
+
+            const tagContainer =document.getElementById(`post-tags_${idx}`);
+            meal.tags.length===0 ? tagContainer.insertAdjacentHTML('beforeend','<p class="no-tags">No meal tags.</p>') : meal.tags.forEach(tag=>{
+                tagContainer.insertAdjacentHTML('beforeend',`<span class="tag">${tag}</span>`);                    
+            });
+
+            /* RENDER POST IMAGE*/ 
             const img = new Image();
             img.crossOrigin = 'Anonymous';
             img.src = meal.imgUrl;
@@ -308,73 +358,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             window.addEventListener('resize' , ()=>{
                 renderMealImg(img,document.querySelector(".post-thumb").clientWidth , 0.5,idx);
-            });      
+            });   
         });
     })
     .catch((err)=>{console.log(err)});
 
-/*----------------------------------------------------------------------------------------------------*/
-    /* -----------------------------
-       REQUESTS MODAL
-    ------------------------------ */
-    const modal = document.getElementById("requestsModal");
-    const requestsList = document.querySelector(".requests-list");
-    const closeBtn = document.querySelector(".close-requests-modal");
-    const overlay = document.querySelector(".modal-overlay");
-
-    /* open modal */
-    function openRequestsModal(requests) {
-        if (!modal) return;
-        requestsList.innerHTML = "";
-        requests.forEach(req => {
-            const item = document.createElement("div");
-            item.classList.add("request-item");
-
-            item.innerHTML = `
-                <div class="request-info">
-                    <strong>${req.name}</strong>
-                    <p class="request-time">${req.timestamp}</p>
-                </div>
-                <div class="request-actions">
-                    <button class="request-btn accept" title="Accept">✓</button>
-                    <button class="request-btn decline" title="Decline">✕</button>
-                </div>
-            `;
-            requestsList.appendChild(item);
-        });
-        modal.classList.remove("hidden");
-        disablePageScroll();
-    }
-
-    /* close modal */
-    function closeModal() {
-        if (!modal) return;
-        modal.classList.add("hidden");
-        enablePageScroll();
-    }
-
-    /* events */
-    closeBtn?.addEventListener("click", closeModal);
-    overlay?.addEventListener("click", closeModal);
-
-    /* request items */
-    document.querySelectorAll(".post-card")?.forEach((card, index) => {
-        const post = mockPosts?.[index];
-        const statusBar = card.querySelector(".post-status-bar");
-
-        if (!post || !statusBar) return;
-        if (post.hasRequests && post.requests?.length) {
-            statusBar.textContent = `${post.requests.length} new requests!`;
-            statusBar.classList.add("yes-requests");
-            statusBar.addEventListener("click", (e) => {
-                e.stopPropagation();
-                openRequestsModal(post.requests);
-            });
-        } else {
-            statusBar.textContent = "No new requests";
-            statusBar.classList.add("no-requests");
-        }
-    });
 
 /*----------------------------------------------------------------------------------------------------*/
     /* -----------------------------
@@ -687,6 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
         enablePageScroll();
     }
 
+    /* HEERE JAADFNADLFNADLFNLADNFLN*/ 
     /* edit button */
     document.querySelectorAll(".menu-dropdown .edit-post").forEach(editBtn => {
             editBtn.addEventListener("click", (e) => {

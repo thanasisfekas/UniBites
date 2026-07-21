@@ -21,9 +21,23 @@ const cloudstorage = new sdk.Storage(client);
 appRouter.get('/meals' , async (req,res)=>{
     let meals = (await pool.query("SELECT * from listing where poster= ? ",[req.session.usr_id]))[0];
     const lst_id = meals.map(meal=> meal.lst_id);
-
-    const requests = (await pool.query("SELECT count(rq_id),lst_id from requests where lst_id in(?) group by lst_id" , [lst_id]))[0].reduce((acc,curr)=>{
+    
+    const req_count = (await pool.query("SELECT count(rq_id),lst_id from requests where lst_id in(?) group by lst_id" , [lst_id]))[0].reduce((acc,curr)=>{
         acc[curr.lst_id] = curr['count(rq_id)'];
+        return acc;
+    },{});
+
+    const req_info = (await pool.query("SELECT requests.std_id,lst_id,usr_username ,created_at  from requests join user on requests.std_id = user.usr_id where status='PENDING' and lst_id IN(?)",[lst_id]))[0].reduce((acc,curr)=>{
+        if(!acc[curr.lst_id]) acc[curr.lst_id] =[];
+        acc[curr.lst_id].push([curr.usr_username , curr.created_at]);
+        return acc;
+    },{});
+
+    const requests  = Object.entries(req_info).reduce((acc,curr)=>{
+        acc[curr[0]] ={
+            count : req_count[curr[0]],
+            info: curr[1]
+        };
         return acc;
     },{});
 
@@ -47,6 +61,7 @@ appRouter.get('/meals' , async (req,res)=>{
         acc[curr.lst_id].push(curr.allerg_type);
         return acc;
     },{});
+
 
     let images =await  cloudstorage.listFiles(process.env.BUCKET_ID);
     const fileIdRegex =new RegExp(`^(${lst_id.join('|')})_.*`);
