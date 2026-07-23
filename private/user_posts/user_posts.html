@@ -45,11 +45,11 @@
                 <a href="#" class="menu-link">Edit Account</a>
             </section>
             <nav class="account-menu">
-                <a href="/deliveries" class="menu-link">Deliveries</a>
-                <a href="/requests" class="menu-link">Requests</a>
-                <a href="/user_orders" class="menu-link">Your Orders</a>
-                <a href="/user_posts" class="menu-link active">Your Posts</a>
-                <a href="/logout" class="menu-link logout">Log Out</a>
+                <a href="../deliveries/deliveries.html" class="menu-link">Deliveries</a>
+                <a href="../requests/requests.html" class="menu-link">Requests</a>
+                <a href="../user_orders/user_orders.html" class="menu-link">Your Orders</a>
+                <a href="../user_posts/user_posts.html" class="menu-link active">Your Posts</a>
+                <a href="../../public/index.html" class="menu-link logout">Log Out</a>
             </nav>
         </aside>
 
@@ -64,114 +64,8 @@
                 <div class="section-title">
                     <span>Active Posts (Check Requests)</span>
                 </div>
-                <div class="posts-grid">
-
-                    <!-- CARD -->
-                    <article class="post-card yes-requests"
-                        data-pickup='[
-                            {"date":"2026-05-20","start":"15:30","end":"17:00"},
-                            {"date":"2026-05-21","start":"12:00","end":"14:00"}
-                        ]'
-                    >
-                        <div class="post-status-bar yes-requests"></div>
-                        <div class="post-thumb"><!-- <img src="meal.jpg" alt="Meal"> --></div>
-
-                        <div class="post-body">
-                            <div class="post-header">
-                                <div class="post-title-group">
-                                    <h2 class="post-title">Homemade Pasta</h2>
-                                    <span class="post-portions">3 left</span>
-                                </div>
-                                <div class="post-menu">
-                                    <button class="menu-trigger" type="button" aria-label="Post actions" aria-expanded="false">
-                                        <svg width="18" height="18" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="5" r="2" fill="currentColor"/>
-                                            <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                                            <circle cx="12" cy="19" r="2" fill="currentColor"/>
-                                        </svg>
-                                    </button>
-                                    <div class="menu-dropdown">
-                                        <a href="#" class="edit-post">Edit</a>
-                                        <a href="#" class="delete">Delete</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="post-description">Fresh pasta with tomato sauce and basil.</p>
-                            <div class="post-tags">
-                                <span class="tag">Pasta</span>
-                                <span class="tag">Vegetarian</span>
-                            </div>
-                            <div class="post-meta">
-                                <span class="post-time">Posted on • 03/04 @ 18:30</span>
-                                <span class="post-time-remaining">24h remaining</span>
-                            </div>
-                            <div class="post-meta">
-                                <span class="post-address">Aratou 60, Patras</span>
-                            </div>
-                            <div class="post-allergens no-allergens">This meal has no allergens noted.</div>
-                        </div>
-                    </article>
-
-                    <!-- CARD 2 -->
-                    <article class="post-card" data-tags="Pasta,Vegetarian" data-allergens="Milk,Gluten">
-                        <div class="post-status-bar no-requests"></div>
-                        <div class="post-thumb"></div>
-
-                        <div class="post-body">
-                            <div class="post-header">
-                                <div class="post-title-group">
-                                    <h2 class="post-title">Homemade Pasta</h2>
-                                    <span class="post-portions">3 left</span>
-                                </div>
-                                <div class="post-menu">
-                                    <button class="menu-trigger" type="button" aria-label="Post actions" aria-expanded="false">
-                                        <svg width="18" height="18" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="5" r="2" fill="currentColor"/>
-                                            <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                                            <circle cx="12" cy="19" r="2" fill="currentColor"/>
-                                        </svg>
-                                    </button>
-                                    <div class="menu-dropdown">
-                                        <a href="#" class="edit-post">Edit</a>
-                                        <a href="#" class="delete">Delete</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="post-description">Fresh pasta with tomato sauce and basil.</p>
-                            <div class="post-tags">
-                                <span class="tag">Pasta</span>
-                                <span class="tag">Vegetarian</span>
-                            </div>
-                            <div class="post-meta">
-                                <span class="post-time">Posted on • 03/04 @ 18:30</span>
-                                <span class="post-time-remaining">24h remaining</span>
-                            </div>
-                            <div class="post-meta">
-                                <span class="post-address">Aratou 60, Patras</span>
-                            </div>
-                            <div class="post-allergens yes-allergens">This meal has allergens.</div>
-                        </div>
-                    </article>
-                </div>
+                <div class="posts-grid"></div>
             </section>
-
-<!---------------------------------------------------------------------------------- REQUESTS MODAL ------------------------------------------------------------------------------------------------------------>
-            <div class="requests-modal hidden" id="requestsModal">
-                <div class="modal-overlay"></div>
-                <div class="requests-modal-content">
-                    <h2>Requests</h2>
-                    <div class="requests-list">
-                        <div class="request-item">
-                            <strong>John Doe</strong>
-                        </div>
-                        <div class="request-item">
-                            <strong>Maria</strong>
-                        </div>
-                    </div>
-                    <button class="btn primary close-requests-modal">Close</button>
-                </div>
-            </div>
-
 <!---------------------------------------------------------------------------------- EDIT POST MODAL ------------------------------------------------------------------------------------------------------------>
             <div class="edit-modal hidden" id="editModal">
                 <div class="modal-overlay"></div>
@@ -289,7 +183,7 @@
                         <!-- PAGE 2 -->
                         <div class="edit-page" id="editPage2">
                             <!-- PICKUP -->
-                            <section class="edit-section">
+                             <section class="edit-section">
                                 <h3 class="edit-section-title">Pickup Information</h3>
                                 <div class="edit-field">
                                     <label for="editAddress">Address</label>
@@ -304,24 +198,33 @@
                                 <section class="edit-section">
                                     <div class="pickup-window-builder">
                                         <!-- date -->
+                                        <!-- start -->
                                         <div class="edit-field">
-                                            <label for="pickupDate">Pickup Date</label>
+                                            <label for="startPickupDate">Start Pickup Date</label>
                                             <input
                                                 type="date"
-                                                id="pickupDate"
+                                                id="startPickupDate"
                                                 min=""
                                                 max=""
                                             >
                                         </div>
-                                        <!-- start -->
                                         <div class="edit-field">
-                                            <label for="pickupStart">Start Time</label>
-                                            <input type="text" id="pickupStart" maxlength="5" placeholder="HH:MM" inputmode="numeric">
+                                            <label for="startPickupTime">Start Time</label>
+                                            <input type="text" id="startPickupTime" maxlength="8" placeholder="HH:MM:" inputmode="numeric">
                                         </div>
                                         <!-- end -->
                                         <div class="edit-field">
-                                            <label for="pickupEnd">End Time</label>
-                                            <input type="text" id="pickupEnd" maxlength="5" placeholder="HH:MM" inputmode="numeric">
+                                            <label for="endPickupDate">Pickup Date</label>
+                                            <input
+                                                type="date"
+                                                id="endPickupDate"
+                                                min=""
+                                                max=""
+                                            >
+                                        </div>
+                                        <div class="edit-field">
+                                            <label for="endPickupTime">End Time</label>
+                                            <input type="text" id="endPickupTime" maxlength="8" placeholder="HH:MM" inputmode="numeric">
                                         </div>
                                         <button
                                             type="button"
@@ -364,7 +267,7 @@
                     </div>
                     <!-- IMAGE -->
                     <div class="view-image-wrapper">
-                        <div class="view-image" id="viewImage">No Image Set</div>
+                        <div class="view-image" id="viewImage"></div>
                     </div>
                     <!-- POST META -->
                     <div class="view-post-meta">
@@ -473,7 +376,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="user_posts.js"></script>
+    <script type="module" src="user_posts.js"></script>
 
 </body>
 </html>
